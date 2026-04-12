@@ -1,22 +1,11 @@
 from bs4 import BeautifulSoup
 import polars as pl
+from get_players_data import get_players_data
 
 def main():
     FILE_PATH = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
 
-    with open(FILE_PATH, encoding="utf-8") as f:  # action
-        html = f.read()
-
-    soup = BeautifulSoup(html, "html.parser")
-    players_table = soup.find("table")
-
-    players_table_headers = [th.text for th in players_table.select("tr th")]
-
-    players_table_rows = [
-        [td.text for td in row.find_all("td")] for row in players_table.select("tr + tr")
-    ]
-
-    players_df = pl.DataFrame(players_table_rows, schema=players_table_headers)
+    players_df = get_players_data(FILE_PATH)
 
     players_df.write_csv("players-raw.csv")
 

@@ -1,4 +1,4 @@
-*.html
+players_20220522.html
 *.csv
 .pytest_cache
 __pycache__
