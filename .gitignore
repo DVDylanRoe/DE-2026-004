@@ -3,4 +3,4 @@ players_20220522.html
 .pytest_cache
 __pycache__
 .venv
-.ipynb
+*.ipynb
