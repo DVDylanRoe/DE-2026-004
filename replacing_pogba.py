@@ -5,6 +5,7 @@ from get_players_data import get_players_data
 
 from transform_columns_to_float import transform_columns_to_float
 from transform_custom_columns import transform_custom_columns
+from transform_per90_columns import transform_per90_columns
 
 def main():
     FILE_PATH = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
@@ -36,21 +37,7 @@ def main():
 
     players_df = transform_custom_columns(players_df)
 
-    players_df = players_df.with_columns(
-        (pl.col("Hdrs A - float") / pl.col("90s")).alias("Hdrs A per 90"),
-        (pl.col("Clear - float") / pl.col("90s")).alias("Clear per 90"),
-        (pl.col("Cr A - float") / pl.col("90s")).alias("Cr A per 90"),
-        (pl.col("Drb - float") / pl.col("90s")).alias("Drb per 90"),
-        (pl.col("FA - float") / pl.col("90s")).alias("FA per 90"),
-        (pl.col("Itc - float") / pl.col("90s")).alias("Itc per 90"),
-        (pl.col("Pas A - float") / pl.col("90s")).alias("Pas A per 90"),
-        (pl.col("Ps C - float") / pl.col("90s")).alias("Ps C per 90"),
-        (pl.col("Non-Penalty Shots") / pl.col("90s")).alias("Non-Penalty Shots per 90"),
-        (pl.col("Tck A") / pl.col("90s")).alias("Tck A per 90"),
-        (pl.col("Yel - float") / pl.col("90s")).alias("Yel per 90"),
-        (pl.col("Red - float") / pl.col("90s")).alias("Red per 90"),
-        (pl.col("Fls - float") / pl.col("90s")).alias("Fls per 90"),
-    )
+    players_df = transform_per90_columns(players_df)
 
     PER_90_COLS = [
         "Hdrs A per 90",
