@@ -6,6 +6,8 @@ from get_players_data import get_players_data
 from transform_columns_to_float import transform_columns_to_float
 from transform_custom_columns import transform_custom_columns
 from transform_per90_columns import transform_per90_columns
+from transform_Z_columns import transform_Z_columns
+
 
 def main():
     FILE_PATH = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
@@ -14,32 +16,11 @@ def main():
 
     players_df.write_csv("players-raw.csv")
 
-    FEATURES = [
-        "Mins",
-        "Hdrs A",
-        "Clear",
-        "Cr A",
-        "Drb",
-        "FA",
-        "Off",
-        "Itc",
-        "Pas A",
-        "Shots",
-        "Pens",
-        "Tck W",
-        "Tck R",
-        "Yel",
-        "Red",
-        "Fls",
-    ]
-
     players_df = transform_columns_to_float(players_df)
 
     players_df = transform_custom_columns(players_df)
 
     players_df = transform_per90_columns(players_df)
-
-    #calculate Z cols#
 
     PER_90_COLS = [
         "Hdrs A per 90",
@@ -52,18 +33,11 @@ def main():
         "Tck A per 90",
     ]
 
-    players_df = players_df.with_columns(
-        [
-            ((pl.col(col) - pl.mean(col)) / pl.std(col)).alias(col + " - Z")
-            for col in PER_90_COLS
-        ]
-    )
-
-    #calculate z cols#
+    players_df = transform_Z_columns(players_df, PER_90_COLS)
 
     FEATURES = [col + " - Z" for col in PER_90_COLS]
 
-    #calculate cos sim#
+    # calculate cos sim#
 
     import numpy as np
 
@@ -82,11 +56,11 @@ def main():
             pl.Series("Pogba Similarity (Cosine)", cos_sim_scaled.tolist()),
         ]
     )
-    #calculate cos sim#
+    # calculate cos sim#
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
-    #calculate ccr and pcr#
+    # calculate ccr and pcr#
 
     players_df = players_df.with_columns(
         (pl.col("CCC").cast(pl.Float64)).alias("CCC - float"),
@@ -94,18 +68,20 @@ def main():
 
     players_df = players_df.with_columns(
         (pl.col("CCC - float") / pl.col("Ps C - float")).alias("Chance Creation Rate"),
-        (pl.col("Ps C - float") / pl.col("Pas A - float")).alias("Pass Completion Rate"),
+        (pl.col("Ps C - float") / pl.col("Pas A - float")).alias(
+            "Pass Completion Rate"
+        ),
     )
 
-    #calculate ccr and pcr#
+    # calculate ccr and pcr#
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
-    #filter for similar players#
+    # filter for similar players#
 
     midfielders_df = players_df.filter(pl.col("Pogba Similarity (Cosine)") >= 90)
 
-    #filter for similar players#
+    # filter for similar players#
 
     midfielders_df.write_csv("replacing-pogba-1.3.csv")
 
@@ -138,6 +114,7 @@ def main():
     ).write_csv("replacing-pogba-1.5.csv")
 
     # create shortlist#
+
 
 if __name__ == "__main__":
     main()
