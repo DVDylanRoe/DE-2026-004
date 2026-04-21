@@ -39,6 +39,8 @@ def main():
 
     players_df = transform_per90_columns(players_df)
 
+    #calculate Z cols#
+
     PER_90_COLS = [
         "Hdrs A per 90",
         "Clear per 90",
@@ -57,7 +59,11 @@ def main():
         ]
     )
 
+    #calculate z cols#
+
     FEATURES = [col + " - Z" for col in PER_90_COLS]
+
+    #calculate cos sim#
 
     import numpy as np
 
@@ -76,9 +82,11 @@ def main():
             pl.Series("Pogba Similarity (Cosine)", cos_sim_scaled.tolist()),
         ]
     )
+    #calculate cos sim#
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
+    #calculate ccr and pcr#
 
     players_df = players_df.with_columns(
         (pl.col("CCC").cast(pl.Float64)).alias("CCC - float"),
@@ -89,33 +97,21 @@ def main():
         (pl.col("Ps C - float") / pl.col("Pas A - float")).alias("Pass Completion Rate"),
     )
 
+    #calculate ccr and pcr#
+
     players_df.write_csv("replacing-pogba-1.1.csv")
+
+    #filter for similar players#
 
     midfielders_df = players_df.filter(pl.col("Pogba Similarity (Cosine)") >= 90)
 
+    #filter for similar players#
+
     midfielders_df.write_csv("replacing-pogba-1.3.csv")
-
-    ccr = midfielders_df.get_column("Chance Creation Rate").cast(pl.Float64).to_list()
-    pcr = midfielders_df.get_column("Pass Completion Rate").cast(pl.Float64).to_list()
-
-
-    ccr_mean = midfielders_df.select(pl.mean("Chance Creation Rate")).row(0)
-    pcc_mean = midfielders_df.select(pl.mean("Pass Completion Rate")).row(0)
 
     import numpy as np
 
-    pogba_row = midfielders_df.filter(pl.col("UID") == "85028014").select(
-        ["Chance Creation Rate", "Pass Completion Rate"]
-    )
-    pogba_ccr = pogba_row["Chance Creation Rate"][0]
-    pogba_pcr = pogba_row["Pass Completion Rate"][0]
-
-    ccr = midfielders_df.get_column("Chance Creation Rate").cast(pl.Float64).to_list()
-    pcr = midfielders_df.get_column("Pass Completion Rate").cast(pl.Float64).to_list()
-
-    ccr_mean = midfielders_df.select(pl.mean("Chance Creation Rate")).row(0)
-    pcr_mean = midfielders_df.select(pl.mean("Pass Completion Rate")).row(0)
-
+    # create shortlist#
 
     pogba_row = midfielders_df.filter(pl.col("UID") == "85028014").select(
         ["Chance Creation Rate", "Pass Completion Rate"]
@@ -140,6 +136,8 @@ def main():
             "Pass Completion Rate",
         ]
     ).write_csv("replacing-pogba-1.5.csv")
+
+    # create shortlist#
 
 if __name__ == "__main__":
     main()
