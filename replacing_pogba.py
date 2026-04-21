@@ -1,7 +1,10 @@
 from bs4 import BeautifulSoup
 import polars as pl
+
 from get_players_data import get_players_data
+
 from transform_columns_to_float import transform_columns_to_float
+from transform_custom_columns import transform_custom_columns
 
 def main():
     FILE_PATH = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
@@ -31,15 +34,7 @@ def main():
 
     players_df = transform_columns_to_float(players_df)
 
-    players_df = players_df.with_columns(
-        (pl.col("Tck W - float") / pl.col("Tck R - float")).alias("Tck A")
-    )
-
-    players_df = players_df.with_columns(
-        (pl.col("Shots - float") - pl.col("Pens - float")).alias("Non-Penalty Shots")
-    )
-
-    players_df = players_df.with_columns((pl.col("Mins - float") / 90).alias("90s"))
+    players_df = transform_custom_columns(players_df)
 
     players_df = players_df.with_columns(
         (pl.col("Hdrs A - float") / pl.col("90s")).alias("Hdrs A per 90"),
