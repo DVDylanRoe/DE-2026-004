@@ -1,4 +1,4 @@
-from transform_Z_columns import transform_Z_columns
+from main import transform_Z_columns
 import polars as pl
 
 

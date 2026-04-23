@@ -1,4 +1,4 @@
-from transform_custom_columns import transform_custom_columns
+from main import transform_custom_columns
 import polars as pl
 
 def test_transform_custom_columns():

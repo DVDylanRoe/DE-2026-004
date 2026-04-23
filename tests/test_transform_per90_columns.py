@@ -1,4 +1,4 @@
-from transform_per90_columns import transform_per90_columns
+from main import transform_per90_columns
 import polars as pl
 
 

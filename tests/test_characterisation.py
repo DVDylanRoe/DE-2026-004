@@ -1,14 +1,14 @@
 import filecmp
 from pathlib import Path
 import pytest
-import replacing_pogba
+import main
 
 
 def test_characterisation(tmp_path, monkeypatch):
 
     monkeypatch.chdir(tmp_path)
 
-    replacing_pogba.main()
+    main.main()
 
     expected_files = [
         "players-raw.csv",

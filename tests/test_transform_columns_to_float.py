@@ -1,4 +1,4 @@
-from transform_columns_to_float import transform_columns_to_float
+from main import transform_columns_to_float
 import polars as pl
 
 
