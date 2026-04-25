@@ -128,7 +128,7 @@ def main():
     players_df = add_non_penalty_shots(players_df)
     players_df = add_nineties_played(players_df)
 
-    xyz_columns = (
+    per_ninety_source_columns = (
         "Hdrs A",
         "Clear",
         "Cr A",
@@ -144,7 +144,7 @@ def main():
         "Fls",
     )
 
-    players_df = transform_per90_columns(players_df, xyz_columns)
+    players_df = transform_per90_columns(players_df, per_ninety_source_columns)
 
     per_ninety_columns = (
         "Hdrs A per 90",

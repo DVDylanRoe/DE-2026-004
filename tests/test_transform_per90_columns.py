@@ -59,7 +59,7 @@ def test_transform_per90_columns():
         ]
     )
 
-    xyz_columns = (
+    per_ninety_source_columns = (
         "Hdrs A",
         "Clear",
         "Cr A",
@@ -75,7 +75,7 @@ def test_transform_per90_columns():
         "Fls",
     )
 
-    output_df = transform_per90_columns(input_df, xyz_columns)
+    output_df = transform_per90_columns(input_df, per_ninety_source_columns)
 
     expected_df = pl.DataFrame(
         [
