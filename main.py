@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
 import polars as pl
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def read_html(file_path: str):
@@ -75,7 +77,12 @@ def add_nineties_played(df):
 
 
 def transform_per90_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
-    df = df.with_columns([(pl.col(column) / pl.col("90s")).alias(f"{column} per 90") for column in columns])
+    df = df.with_columns(
+        [
+            (pl.col(column) / pl.col("90s")).alias(f"{column} per 90")
+            for column in columns
+        ]
+    )
 
     return df
 
@@ -86,6 +93,26 @@ def transform_Z_columns(df: pl.DataFrame, per_ninety_columns: tuple) -> pl.DataF
         [
             ((pl.col(column) - pl.mean(column)) / pl.std(column)).alias(f"{column} Z")
             for column in per_ninety_columns
+        ]
+    )
+
+    return df
+
+
+def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.DataFrame:
+    player = df.filter(pl.col("UID") == uid).select(columns)
+    player_vector = player.to_numpy()
+
+    feature_matrix = df.select(columns).to_numpy()
+
+    cosine_similarity_scores = cosine_similarity(
+        feature_matrix, player_vector
+    ).flatten()
+    cosine_similarity_scores_scaled = (cosine_similarity_scores * 50) + 50
+
+    df = df.with_columns(
+        [
+            pl.Series("Similarity", cosine_similarity_scores_scaled.tolist()),
         ]
     )
 
@@ -161,30 +188,7 @@ def main():
 
     zscore_feature_columns = [column + " Z" for column in per_ninety_columns]
 
-    # calculate cos sim#
-
-    import numpy as np
-
-    pogba = players_df.filter(pl.col("UID") == "85028014").select(
-        zscore_feature_columns
-    )
-    pogba_vector = pogba.to_numpy()
-
-    feature_matrix = players_df.select(zscore_feature_columns).to_numpy()
-
-    from sklearn.metrics.pairwise import cosine_similarity
-
-    cosine_similarity_scores = cosine_similarity(feature_matrix, pogba_vector).flatten()
-    cosine_similarity_scores_scaled = (
-        cosine_similarity_scores * 50
-    ) + 50  # scale to 0–100
-
-    players_df = players_df.with_columns(
-        [
-            pl.Series("Pogba Similarity", cosine_similarity_scores_scaled.tolist()),
-        ]
-    )
-    # calculate cos sim#
+    players_df = compute_similarity(players_df, "85028014", zscore_feature_columns)
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
@@ -201,7 +205,7 @@ def main():
 
     # filter for similar players#
 
-    midfielders_df = players_df.filter(pl.col("Pogba Similarity") >= 90)
+    midfielders_df = players_df.filter(pl.col("Similarity") >= 90)
 
     # filter for similar players#
 
@@ -219,7 +223,7 @@ def main():
     pogba_pass_completion_rate = pogba_row["Pass Completion Rate"][0]
 
     shortlist_df = players_df.filter(
-        (pl.col("Pogba Similarity") >= 90)
+        (pl.col("Similarity") >= 90)
         & (pl.col("Chance Creation Rate") >= pogba_chance_creation_rate)
         & (pl.col("Pass Completion Rate") >= pogba_pass_completion_rate)
     )
@@ -229,7 +233,7 @@ def main():
             "UID",
             "Name",
             "Club",
-            "Pogba Similarity",
+            "Similarity",
             "Chance Creation Rate",
             "Pass Completion Rate",
         ]
