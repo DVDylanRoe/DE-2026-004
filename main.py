@@ -56,11 +56,19 @@ def convert_percentage_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataF
     return df
 
 
-def transform_custom_columns(df: pl.DataFrame) -> pl.DataFrame:
+def add_tackles_attempted(df):
     df = df.with_columns((pl.col("Tck W") / pl.col("Tck R")).alias("Tck A"))
 
+    return df
+
+
+def add_non_penalty_shots(df):
     df = df.with_columns((pl.col("Shots") - pl.col("Pens")).alias("Non Penalty Shots"))
 
+    return df
+
+
+def add_nineties_played(df):
     df = df.with_columns((pl.col("Mins") / 90).alias("90s"))
 
     return df
@@ -130,7 +138,9 @@ def main():
     players_df = cast_numeric_columns(players_df, numeric_columns)
     players_df = convert_percentage_columns(players_df, percentage_columns)
 
-    players_df = transform_custom_columns(players_df)
+    players_df = add_tackles_attempted(players_df)
+    players_df = add_non_penalty_shots(players_df)
+    players_df = add_nineties_played(players_df)
 
     players_df = transform_per90_columns(players_df)
 
