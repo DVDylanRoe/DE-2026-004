@@ -140,6 +140,23 @@ def find_similar_players(df: pl.DataFrame, threshold: int = 90) -> pl.DataFrame:
     return similar_df
 
 
+def create_shortlist(df: pl.DataFrame):
+    player_stats = df.filter(pl.col("UID") == "85028014").select(
+        ["Chance Creation Rate", "Pass Completion Rate"]
+    )
+
+    player_chance_creation_rate = player_stats["Chance Creation Rate"][0]
+    player_pass_completion_rate = player_stats["Pass Completion Rate"][0]
+
+    shortlist_df = df.filter(
+        (pl.col("Similarity") >= 90)
+        & (pl.col("Chance Creation Rate") >= player_chance_creation_rate)
+        & (pl.col("Pass Completion Rate") >= player_pass_completion_rate)
+    )
+
+    return shortlist_df
+
+
 def main():
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
 
@@ -211,33 +228,16 @@ def main():
 
     players_df = compute_similarity(players_df, "85028014", zscore_feature_columns)
 
-    players_df.write_csv("replacing-pogba-1.1.csv")
-
     players_df = add_chance_creation_rate(players_df)
     players_df = add_pass_completion_rate(players_df)
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
-    # filter for similar players#
-
     similar_df = find_similar_players(players_df)
-
-    # filter for similar players#
 
     similar_df.write_csv("replacing-pogba-1.3.csv")
 
-    pogba_row = similar_df.filter(pl.col("UID") == "85028014").select(
-        ["Chance Creation Rate", "Pass Completion Rate"]
-    )
-
-    pogba_chance_creation_rate = pogba_row["Chance Creation Rate"][0]
-    pogba_pass_completion_rate = pogba_row["Pass Completion Rate"][0]
-
-    shortlist_df = players_df.filter(
-        (pl.col("Similarity") >= 90)
-        & (pl.col("Chance Creation Rate") >= pogba_chance_creation_rate)
-        & (pl.col("Pass Completion Rate") >= pogba_pass_completion_rate)
-    )
+    shortlist_df = create_shortlist(players_df)
 
     shortlist_df.select(
         [
@@ -249,8 +249,6 @@ def main():
             "Pass Completion Rate",
         ]
     ).write_csv("replacing-pogba-1.5.csv")
-
-    # create shortlist#
 
 
 if __name__ == "__main__":
