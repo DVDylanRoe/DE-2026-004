@@ -126,11 +126,18 @@ def add_chance_creation_rate(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def add_pass_completion_rate(df: pl.DataFrame) -> pl.DataFrame:
-    players_df = players_df.with_columns(
+    df = df.with_columns(
         (pl.col("Ps C") / pl.col("Pas A")).alias("Pass Completion Rate"),
     )
 
     return df
+
+
+def find_similar_players(df: pl.DataFrame, threshold: int = 90) -> pl.DataFrame:
+
+    similar_df = df.filter(pl.col("Similarity") >= threshold)
+
+    return similar_df
 
 
 def main():
@@ -213,17 +220,13 @@ def main():
 
     # filter for similar players#
 
-    midfielders_df = players_df.filter(pl.col("Similarity") >= 90)
+    similar_df = find_similar_players(players_df)
 
     # filter for similar players#
 
-    midfielders_df.write_csv("replacing-pogba-1.3.csv")
+    similar_df.write_csv("replacing-pogba-1.3.csv")
 
-    import numpy as np
-
-    # create shortlist#
-
-    pogba_row = midfielders_df.filter(pl.col("UID") == "85028014").select(
+    pogba_row = similar_df.filter(pl.col("UID") == "85028014").select(
         ["Chance Creation Rate", "Pass Completion Rate"]
     )
 
