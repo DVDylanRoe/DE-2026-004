@@ -2,6 +2,31 @@ from bs4 import BeautifulSoup
 import polars as pl
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class ColumnConfig:
+    numeric_string_columns: tuple[str, ...] = ("Mins", "Pas A", "Ps C")
+    numeric_columns: tuple[str, ...] = (
+        "Mins",
+        "Hdrs A",
+        "Clear",
+        "Cr A",
+        "Drb",
+        "FA",
+        "Itc",
+        "Pas A",
+        "Ps C",
+        "Shots",
+        "Pens",
+        "Tck W",
+        "Yel",
+        "Red",
+        "Fls",
+        "CCC",
+    )
+    percentage_columns: tuple[str, ...] = ("Tck R",)
 
 
 def read_html(file_path: str):
@@ -54,6 +79,14 @@ def convert_percentage_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataF
             for column in columns
         ]
     )
+
+    return df
+
+
+def clean_data(df: pl.DataFrame, Config: dataclass):
+    df = clean_numeric_string_columns(df, Config.numeric_string_columns)
+    df = cast_numeric_columns(df, Config.numeric_columns)
+    df = convert_percentage_columns(df, Config.percentage_columns)
 
     return df
 
@@ -164,30 +197,9 @@ def main():
 
     players_df.write_csv("players-raw.csv")
 
-    numeric_string_columns = ("Mins", "Pas A", "Ps C")
-    numeric_columns = (
-        "Mins",
-        "Hdrs A",
-        "Clear",
-        "Cr A",
-        "Drb",
-        "FA",
-        "Itc",
-        "Pas A",
-        "Ps C",
-        "Shots",
-        "Pens",
-        "Tck W",
-        "Yel",
-        "Red",
-        "Fls",
-        "CCC",
-    )
-    percentage_columns = ["Tck R"]
+    column_config = ColumnConfig()
 
-    players_df = clean_numeric_string_columns(players_df, numeric_string_columns)
-    players_df = cast_numeric_columns(players_df, numeric_columns)
-    players_df = convert_percentage_columns(players_df, percentage_columns)
+    players_df = clean_data(players_df, column_config)
 
     players_df = add_tackles_attempted(players_df)
     players_df = add_non_penalty_shots(players_df)
