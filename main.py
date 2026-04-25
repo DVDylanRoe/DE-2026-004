@@ -119,6 +119,20 @@ def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.Dat
     return df
 
 
+def add_chance_creation_rate(df: pl.DataFrame) -> pl.DataFrame:
+    df = df.with_columns((pl.col("CCC") / pl.col("Ps C")).alias("Chance Creation Rate"))
+
+    return df
+
+
+def add_pass_completion_rate(df: pl.DataFrame) -> pl.DataFrame:
+    players_df = players_df.with_columns(
+        (pl.col("Ps C") / pl.col("Pas A")).alias("Pass Completion Rate"),
+    )
+
+    return df
+
+
 def main():
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
 
@@ -192,14 +206,8 @@ def main():
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
-    # calculate ccr and pcr#
-
-    players_df = players_df.with_columns(
-        (pl.col("CCC") / pl.col("Ps C")).alias("Chance Creation Rate"),
-        (pl.col("Ps C") / pl.col("Pas A")).alias("Pass Completion Rate"),
-    )
-
-    # calculate ccr and pcr#
+    players_df = add_chance_creation_rate(players_df)
+    players_df = add_pass_completion_rate(players_df)
 
     players_df.write_csv("replacing-pogba-1.1.csv")
 
