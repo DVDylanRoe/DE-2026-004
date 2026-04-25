@@ -27,6 +27,34 @@ class ColumnConfig:
         "CCC",
     )
     percentage_columns: tuple[str, ...] = ("Tck R",)
+    per_ninety_source_columns: tuple[str, ...] = (
+        "Hdrs A",
+        "Clear",
+        "Cr A",
+        "Drb",
+        "FA",
+        "Itc",
+        "Pas A",
+        "Ps C",
+        "Non Penalty Shots",
+        "Tck A",
+        "Yel",
+        "Red",
+        "Fls",
+    )
+    per_ninety_columns: tuple[str, ...] = (
+        "Hdrs A per 90",
+        "Clear per 90",
+        "Cr A per 90",
+        "Drb per 90",
+        "Itc per 90",
+        "Pas A per 90",
+        "Non Penalty Shots per 90",
+        "Tck A per 90",
+    )
+    zscore_feature_columns: tuple[str, ...] = tuple(
+        column + " Z" for column in per_ninety_columns
+    )
 
 
 def read_html(file_path: str):
@@ -166,6 +194,19 @@ def add_pass_completion_rate(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
+def add_dervied_columns(df: pl.DataFrame, Config: dataclass, uid: str):
+    df = add_tackles_attempted(df)
+    df = add_non_penalty_shots(df)
+    df = add_nineties_played(df)
+    df = transform_per90_columns(df, Config.per_ninety_source_columns)
+    df = transform_Z_columns(df, Config.per_ninety_columns)
+    df = compute_similarity(df, uid, Config.zscore_feature_columns)
+    df = add_chance_creation_rate(df)
+    df = add_pass_completion_rate(df)
+
+    return df
+
+
 def find_similar_players(df: pl.DataFrame, threshold: int = 90) -> pl.DataFrame:
 
     similar_df = df.filter(pl.col("Similarity") >= threshold)
@@ -192,65 +233,19 @@ def create_shortlist(df: pl.DataFrame):
 
 def main():
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
-
-    players_df = get_players_data(file_path)
-
-    players_df.write_csv("players-raw.csv")
-
     column_config = ColumnConfig()
 
+    players_df = get_players_data(file_path)
+    players_df.write_csv("players-raw.csv")
+
     players_df = clean_data(players_df, column_config)
-
-    players_df = add_tackles_attempted(players_df)
-    players_df = add_non_penalty_shots(players_df)
-    players_df = add_nineties_played(players_df)
-
-    per_ninety_source_columns = (
-        "Hdrs A",
-        "Clear",
-        "Cr A",
-        "Drb",
-        "FA",
-        "Itc",
-        "Pas A",
-        "Ps C",
-        "Non Penalty Shots",
-        "Tck A",
-        "Yel",
-        "Red",
-        "Fls",
-    )
-
-    players_df = transform_per90_columns(players_df, per_ninety_source_columns)
-
-    per_ninety_columns = (
-        "Hdrs A per 90",
-        "Clear per 90",
-        "Cr A per 90",
-        "Drb per 90",
-        "Itc per 90",
-        "Pas A per 90",
-        "Non Penalty Shots per 90",
-        "Tck A per 90",
-    )
-
-    players_df = transform_Z_columns(players_df, per_ninety_columns)
-
-    zscore_feature_columns = [column + " Z" for column in per_ninety_columns]
-
-    players_df = compute_similarity(players_df, "85028014", zscore_feature_columns)
-
-    players_df = add_chance_creation_rate(players_df)
-    players_df = add_pass_completion_rate(players_df)
-
+    players_df = add_dervied_columns(players_df, column_config, "85028014")
     players_df.write_csv("replacing-pogba-1.1.csv")
 
     similar_df = find_similar_players(players_df)
-
     similar_df.write_csv("replacing-pogba-1.3.csv")
 
     shortlist_df = create_shortlist(players_df)
-
     shortlist_df.select(
         [
             "UID",
