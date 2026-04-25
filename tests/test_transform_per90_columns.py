@@ -59,7 +59,23 @@ def test_transform_per90_columns():
         ]
     )
 
-    output_df = transform_per90_columns(input_df)
+    xyz_columns = (
+        "Hdrs A",
+        "Clear",
+        "Cr A",
+        "Drb",
+        "FA",
+        "Itc",
+        "Pas A",
+        "Ps C",
+        "Non Penalty Shots",
+        "Tck A",
+        "Yel",
+        "Red",
+        "Fls",
+    )
+
+    output_df = transform_per90_columns(input_df, xyz_columns)
 
     expected_df = pl.DataFrame(
         [

@@ -74,22 +74,8 @@ def add_nineties_played(df):
     return df
 
 
-def transform_per90_columns(df: pl.DataFrame) -> pl.DataFrame:
-    df = df.with_columns(
-        (pl.col("Hdrs A") / pl.col("90s")).alias("Hdrs A per 90"),
-        (pl.col("Clear") / pl.col("90s")).alias("Clear per 90"),
-        (pl.col("Cr A") / pl.col("90s")).alias("Cr A per 90"),
-        (pl.col("Drb") / pl.col("90s")).alias("Drb per 90"),
-        (pl.col("FA") / pl.col("90s")).alias("FA per 90"),
-        (pl.col("Itc") / pl.col("90s")).alias("Itc per 90"),
-        (pl.col("Pas A") / pl.col("90s")).alias("Pas A per 90"),
-        (pl.col("Ps C") / pl.col("90s")).alias("Ps C per 90"),
-        (pl.col("Non Penalty Shots") / pl.col("90s")).alias("Non Penalty Shots per 90"),
-        (pl.col("Tck A") / pl.col("90s")).alias("Tck A per 90"),
-        (pl.col("Yel") / pl.col("90s")).alias("Yel per 90"),
-        (pl.col("Red") / pl.col("90s")).alias("Red per 90"),
-        (pl.col("Fls") / pl.col("90s")).alias("Fls per 90"),
-    )
+def transform_per90_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
+    df = df.with_columns([(pl.col(column) / pl.col("90s")).alias(f"{column} per 90") for column in columns])
 
     return df
 
@@ -98,7 +84,7 @@ def transform_Z_columns(df: pl.DataFrame, per_ninety_columns: tuple) -> pl.DataF
 
     df = df.with_columns(
         [
-            ((pl.col(column) - pl.mean(column)) / pl.std(column)).alias(column + " Z")
+            ((pl.col(column) - pl.mean(column)) / pl.std(column)).alias(f"{column} Z")
             for column in per_ninety_columns
         ]
     )
@@ -142,7 +128,23 @@ def main():
     players_df = add_non_penalty_shots(players_df)
     players_df = add_nineties_played(players_df)
 
-    players_df = transform_per90_columns(players_df)
+    xyz_columns = (
+        "Hdrs A",
+        "Clear",
+        "Cr A",
+        "Drb",
+        "FA",
+        "Itc",
+        "Pas A",
+        "Ps C",
+        "Non Penalty Shots",
+        "Tck A",
+        "Yel",
+        "Red",
+        "Fls",
+    )
+
+    players_df = transform_per90_columns(players_df, xyz_columns)
 
     per_ninety_columns = (
         "Hdrs A per 90",
