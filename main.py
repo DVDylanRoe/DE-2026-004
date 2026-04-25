@@ -1,11 +1,13 @@
 from bs4 import BeautifulSoup
 import polars as pl
 
+
 def read_html(file_path: str):
     with open(file_path, encoding="utf-8") as file:
         html = file.read()
         return html
-    
+
+
 def parse_html_table(html: str) -> tuple[list[str], list[list[str]]]:
     soup = BeautifulSoup(html, "html.parser")
     table = soup.find("table")
@@ -13,11 +15,9 @@ def parse_html_table(html: str) -> tuple[list[str], list[list[str]]]:
     headers = [header.text for header in table.select("tr th")]
 
     rows = [
-        [data.text for data in row.find_all("td")]
-        for row in table.select("tr + tr")
+        [data.text for data in row.find_all("td")] for row in table.select("tr + tr")
     ]
     return headers, rows
-
 
 
 def get_players_data(file_path: str) -> pl.DataFrame:
@@ -33,38 +33,33 @@ def get_players_data(file_path: str) -> pl.DataFrame:
     return players_df
 
 
-def transform_columns_to_float(df: pl.DataFrame) -> pl.DataFrame:
+def clean_numeric_string_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
+    df = df.with_columns([pl.col(column).str.replace(",", "") for column in columns])
+
+    return df
+
+
+def cast_numeric_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
+    df = df.with_columns([pl.col(column).cast(pl.Float64) for column in columns])
+
+    return df
+
+
+def convert_percentage_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
     df = df.with_columns(
-        (pl.col("Mins").str.replace(",", "").cast(pl.Float64)),
-        (pl.col("Hdrs A").cast(pl.Float64)),
-        (pl.col("Clear").cast(pl.Float64)),
-        (pl.col("Cr A").cast(pl.Float64)),
-        (pl.col("Drb").cast(pl.Float64)),
-        (pl.col("FA").cast(pl.Float64)),
-        (pl.col("Itc").cast(pl.Float64)),
-        (pl.col("Pas A").str.replace(",", "").cast(pl.Float64)),
-        (pl.col("Ps C").str.replace(",", "").cast(pl.Float64)),
-        (pl.col("Shots").cast(pl.Float64)),
-        (pl.col("Pens").cast(pl.Float64)),
-        (pl.col("Tck W").cast(pl.Float64)),
-        (pl.col("Tck R").str.replace("%", "").cast(pl.Float64) / 100),
-        (pl.col("Yel").cast(pl.Float64)),
-        (pl.col("Red").cast(pl.Float64)),
-        (pl.col("Fls").cast(pl.Float64)),
-        (pl.col("CCC").cast(pl.Float64)).alias("CCC"),
+        [
+            (pl.col(column).str.replace("%", "").cast(pl.Float64) / 100)
+            for column in columns
+        ]
     )
 
     return df
 
 
 def transform_custom_columns(df: pl.DataFrame) -> pl.DataFrame:
-    df = df.with_columns(
-        (pl.col("Tck W") / pl.col("Tck R")).alias("Tck A")
-    )
+    df = df.with_columns((pl.col("Tck W") / pl.col("Tck R")).alias("Tck A"))
 
-    df = df.with_columns(
-        (pl.col("Shots") - pl.col("Pens")).alias("Non Penalty Shots")
-    )
+    df = df.with_columns((pl.col("Shots") - pl.col("Pens")).alias("Non Penalty Shots"))
 
     df = df.with_columns((pl.col("Mins") / 90).alias("90s"))
 
@@ -110,7 +105,30 @@ def main():
 
     players_df.write_csv("players-raw.csv")
 
-    players_df = transform_columns_to_float(players_df)
+    numeric_string_columns = ("Mins", "Pas A", "Ps C")
+    numeric_columns = (
+        "Mins",
+        "Hdrs A",
+        "Clear",
+        "Cr A",
+        "Drb",
+        "FA",
+        "Itc",
+        "Pas A",
+        "Ps C",
+        "Shots",
+        "Pens",
+        "Tck W",
+        "Yel",
+        "Red",
+        "Fls",
+        "CCC",
+    )
+    percentage_columns = ["Tck R"]
+
+    players_df = clean_numeric_string_columns(players_df, numeric_string_columns)
+    players_df = cast_numeric_columns(players_df, numeric_columns)
+    players_df = convert_percentage_columns(players_df, percentage_columns)
 
     players_df = transform_custom_columns(players_df)
 
@@ -135,7 +153,9 @@ def main():
 
     import numpy as np
 
-    pogba = players_df.filter(pl.col("UID") == "85028014").select(zscore_feature_columns)
+    pogba = players_df.filter(pl.col("UID") == "85028014").select(
+        zscore_feature_columns
+    )
     pogba_vector = pogba.to_numpy()
 
     feature_matrix = players_df.select(zscore_feature_columns).to_numpy()
@@ -143,7 +163,9 @@ def main():
     from sklearn.metrics.pairwise import cosine_similarity
 
     cosine_similarity_scores = cosine_similarity(feature_matrix, pogba_vector).flatten()
-    cosine_similarity_scores_scaled = (cosine_similarity_scores * 50) + 50  # scale to 0–100
+    cosine_similarity_scores_scaled = (
+        cosine_similarity_scores * 50
+    ) + 50  # scale to 0–100
 
     players_df = players_df.with_columns(
         [
@@ -158,9 +180,7 @@ def main():
 
     players_df = players_df.with_columns(
         (pl.col("CCC") / pl.col("Ps C")).alias("Chance Creation Rate"),
-        (pl.col("Ps C") / pl.col("Pas A")).alias(
-            "Pass Completion Rate"
-        ),
+        (pl.col("Ps C") / pl.col("Pas A")).alias("Pass Completion Rate"),
     )
 
     # calculate ccr and pcr#
