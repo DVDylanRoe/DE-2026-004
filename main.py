@@ -159,10 +159,13 @@ def transform_Z_columns(df: pl.DataFrame, per_ninety_columns: tuple) -> pl.DataF
 
     return df
 
+def extract_player_vector(df: pl.DataFrame, uid: str, columns: list[str]) -> np.array:
+    player = df.filter(pl.col("UID") == uid).select(columns)
+    player_vector = player.to_numpy().astype(float)
+    return player_vector
 
 def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.DataFrame:
-    player = df.filter(pl.col("UID") == uid).select(columns)
-    player_vector = player.to_numpy()
+    player_vector = extract_player_vector(df, uid, columns)
 
     feature_matrix = df.select(columns).to_numpy()
 
