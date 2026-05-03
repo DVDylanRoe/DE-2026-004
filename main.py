@@ -164,10 +164,15 @@ def extract_player_vector(df: pl.DataFrame, uid: str, columns: list[str]) -> np.
     player_vector = player.to_numpy().astype(float)
     return player_vector
 
+def extract_feature_matrix(df: pl.DataFrame, columns: list[str]) -> np.array:
+    feature_matrix = df.select(columns).to_numpy()
+
+    return feature_matrix
+
 def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.DataFrame:
     player_vector = extract_player_vector(df, uid, columns)
 
-    feature_matrix = df.select(columns).to_numpy()
+    feature_matrix = extract_feature_matrix(df, columns)
 
     cosine_similarity_scores = cosine_similarity(
         feature_matrix, player_vector
