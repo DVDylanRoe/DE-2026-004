@@ -159,15 +159,24 @@ def transform_Z_columns(df: pl.DataFrame, per_ninety_columns: tuple) -> pl.DataF
 
     return df
 
+
 def extract_player_vector(df: pl.DataFrame, uid: str, columns: list[str]) -> np.array:
     player = df.filter(pl.col("UID") == uid).select(columns)
     player_vector = player.to_numpy().astype(float)
     return player_vector
 
+
 def extract_feature_matrix(df: pl.DataFrame, columns: list[str]) -> np.array:
     feature_matrix = df.select(columns).to_numpy()
 
     return feature_matrix
+
+
+def scale_similarity(similarity_scores: np.array) -> np.array:
+    similarity_scores_scaled = (similarity_scores * 50) + 50
+
+    return similarity_scores_scaled
+
 
 def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.DataFrame:
     player_vector = extract_player_vector(df, uid, columns)
@@ -177,7 +186,7 @@ def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.Dat
     cosine_similarity_scores = cosine_similarity(
         feature_matrix, player_vector
     ).flatten()
-    cosine_similarity_scores_scaled = (cosine_similarity_scores * 50) + 50
+    cosine_similarity_scores_scaled = scale_similarity(cosine_similarity_scores)
 
     df = df.with_columns(
         [

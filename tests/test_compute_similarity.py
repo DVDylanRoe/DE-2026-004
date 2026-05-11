@@ -1,6 +1,6 @@
 import polars as pl
 import numpy as np
-from main import extract_player_vector, extract_feature_matrix
+from main import extract_player_vector, extract_feature_matrix, scale_similarity
 
 
 def test_extract_player_vector():
@@ -877,6 +877,21 @@ def test_extract_feature_matrix():
             ],
         ],
         dtype=float,
+    )
+
+    np.testing.assert_allclose(
+        output,
+        expected,
+    )
+
+
+def test_scale_similarity():
+    input = np.array([-0.17972866, -0.26922463, -0.16451044, -0.02216566, -0.18559143])
+
+    output = scale_similarity(input)
+
+    expected = np.array(
+        [41.01356689, 36.53876832, 41.7744782, 48.891717, 40.72042839]
     )
 
     np.testing.assert_allclose(
