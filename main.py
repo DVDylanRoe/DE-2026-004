@@ -177,6 +177,15 @@ def scale_similarity(similarity_scores: np.array) -> np.array:
 
     return similarity_scores_scaled
 
+def attach_similarity(df: pl.DataFrame, similarity_scores: np.array) -> pl.DataFrame:
+    df = df.with_columns(
+        [
+            pl.Series("Similarity", similarity_scores.tolist()),
+        ]
+    )
+
+    return df
+
 
 def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.DataFrame:
     player_vector = extract_player_vector(df, uid, columns)
@@ -188,11 +197,7 @@ def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.Dat
     ).flatten()
     cosine_similarity_scores_scaled = scale_similarity(cosine_similarity_scores)
 
-    df = df.with_columns(
-        [
-            pl.Series("Similarity", cosine_similarity_scores_scaled.tolist()),
-        ]
-    )
+    df = attach_similarity(df, cosine_similarity_scores_scaled)
 
     return df
 

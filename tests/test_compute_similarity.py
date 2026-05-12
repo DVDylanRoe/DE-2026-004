@@ -1,6 +1,11 @@
 import polars as pl
 import numpy as np
-from main import extract_player_vector, extract_feature_matrix, scale_similarity
+from main import (
+    extract_player_vector,
+    extract_feature_matrix,
+    scale_similarity,
+    attach_similarity,
+)
 
 
 def test_extract_player_vector():
@@ -890,11 +895,142 @@ def test_scale_similarity():
 
     output = scale_similarity(input)
 
-    expected = np.array(
-        [41.01356689, 36.53876832, 41.7744782, 48.891717, 40.72042839]
-    )
+    expected = np.array([41.01356689, 36.53876832, 41.7744782, 48.891717, 40.72042839])
 
     np.testing.assert_allclose(
         output,
         expected,
+    )
+
+
+def test_attach_similarity():
+    df = pl.DataFrame(
+        [
+            {
+                "UID": "719601",
+                "Hdrs A per 90 - Z": 0.3975874293278999,
+                "Clear per 90 - Z": -0.7333605233539464,
+                "Cr A per 90 - Z": -0.7273073514741791,
+                "Drb per 90 - Z": -0.39194504291950716,
+                "Itc per 90 - Z": -1.7266260647695595,
+                "Pas A per 90 - Z": -1.4193264133770644,
+                "Non-Penalty Shots per 90 - Z": 4.0039336464064075,
+                "Tck A per 90 - Z": -0.8291486717692735,
+            },
+            {
+                "UID": "29179241",
+                "Hdrs A per 90 - Z": 1.3313508538951497,
+                "Clear per 90 - Z": -0.6033451624646476,
+                "Cr A per 90 - Z": -0.3576449639511732,
+                "Drb per 90 - Z": 0.7752032253627398,
+                "Itc per 90 - Z": -1.3518956954865335,
+                "Pas A per 90 - Z": -1.210008876381369,
+                "Non-Penalty Shots per 90 - Z": 4.770446349177681,
+                "Tck A per 90 - Z": -0.8464824557654527,
+            },
+            {
+                "UID": "62182055",
+                "Hdrs A per 90 - Z": 0.5845703398122685,
+                "Clear per 90 - Z": -0.8610922058443187,
+                "Cr A per 90 - Z": -0.6691611110773129,
+                "Drb per 90 - Z": -0.031752929163337135,
+                "Itc per 90 - Z": -1.228899214566039,
+                "Pas A per 90 - Z": -1.1934088656715922,
+                "Non-Penalty Shots per 90 - Z": 2.841821351819368,
+                "Tck A per 90 - Z": -1.3386542499374174,
+            },
+            {
+                "UID": "18007344",
+                "Hdrs A per 90 - Z": 0.47573688425235805,
+                "Clear per 90 - Z": -0.5243827909226783,
+                "Cr A per 90 - Z": -0.6918565823250108,
+                "Drb per 90 - Z": -0.3638863016204905,
+                "Itc per 90 - Z": -1.4618329832001087,
+                "Pas A per 90 - Z": -0.7473168613293786,
+                "Non-Penalty Shots per 90 - Z": 2.071775529878353,
+                "Tck A per 90 - Z": -1.3987341399397393,
+            },
+            {
+                "UID": "67220143",
+                "Hdrs A per 90 - Z": 0.7084289186475415,
+                "Clear per 90 - Z": -0.8548090395581012,
+                "Cr A per 90 - Z": -0.3057309553497645,
+                "Drb per 90 - Z": 0.3569601349680111,
+                "Itc per 90 - Z": -1.0982500260199355,
+                "Pas A per 90 - Z": -0.7692354645658186,
+                "Non-Penalty Shots per 90 - Z": 3.617381617412252,
+                "Tck A per 90 - Z": -0.6577908040942849,
+            },
+        ]
+    )
+
+    similarity_Scores = np.array(
+        [41.01356689, 36.53876832, 41.7744782, 48.891717, 40.72042839]
+    )
+
+    output_df = attach_similarity(df, similarity_Scores)
+
+    expected_df = pl.DataFrame(
+        [
+            {
+                "UID": "719601",
+                "Hdrs A per 90 - Z": 0.3975874293278999,
+                "Clear per 90 - Z": -0.7333605233539464,
+                "Cr A per 90 - Z": -0.7273073514741791,
+                "Drb per 90 - Z": -0.39194504291950716,
+                "Itc per 90 - Z": -1.7266260647695595,
+                "Pas A per 90 - Z": -1.4193264133770644,
+                "Non-Penalty Shots per 90 - Z": 4.0039336464064075,
+                "Tck A per 90 - Z": -0.8291486717692735,
+                "Similarity": 41.01356689
+            },
+            {
+                "UID": "29179241",
+                "Hdrs A per 90 - Z": 1.3313508538951497,
+                "Clear per 90 - Z": -0.6033451624646476,
+                "Cr A per 90 - Z": -0.3576449639511732,
+                "Drb per 90 - Z": 0.7752032253627398,
+                "Itc per 90 - Z": -1.3518956954865335,
+                "Pas A per 90 - Z": -1.210008876381369,
+                "Non-Penalty Shots per 90 - Z": 4.770446349177681,
+                "Tck A per 90 - Z": -0.8464824557654527,
+                "Similarity": 36.53876832
+            },
+            {
+                "UID": "62182055",
+                "Hdrs A per 90 - Z": 0.5845703398122685,
+                "Clear per 90 - Z": -0.8610922058443187,
+                "Cr A per 90 - Z": -0.6691611110773129,
+                "Drb per 90 - Z": -0.031752929163337135,
+                "Itc per 90 - Z": -1.228899214566039,
+                "Pas A per 90 - Z": -1.1934088656715922,
+                "Non-Penalty Shots per 90 - Z": 2.841821351819368,
+                "Tck A per 90 - Z": -1.3386542499374174,
+                "Similarity": 41.7744782
+            },
+            {
+                "UID": "18007344",
+                "Hdrs A per 90 - Z": 0.47573688425235805,
+                "Clear per 90 - Z": -0.5243827909226783,
+                "Cr A per 90 - Z": -0.6918565823250108,
+                "Drb per 90 - Z": -0.3638863016204905,
+                "Itc per 90 - Z": -1.4618329832001087,
+                "Pas A per 90 - Z": -0.7473168613293786,
+                "Non-Penalty Shots per 90 - Z": 2.071775529878353,
+                "Tck A per 90 - Z": -1.3987341399397393,
+                "Similarity": 48.891717
+            },
+            {
+                "UID": "67220143",
+                "Hdrs A per 90 - Z": 0.7084289186475415,
+                "Clear per 90 - Z": -0.8548090395581012,
+                "Cr A per 90 - Z": -0.3057309553497645,
+                "Drb per 90 - Z": 0.3569601349680111,
+                "Itc per 90 - Z": -1.0982500260199355,
+                "Pas A per 90 - Z": -0.7692354645658186,
+                "Non-Penalty Shots per 90 - Z": 3.617381617412252,
+                "Tck A per 90 - Z": -0.6577908040942849,
+                "Similarity": 40.72042839
+            },
+        ]
     )
