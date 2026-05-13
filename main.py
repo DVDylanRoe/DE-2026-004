@@ -235,14 +235,21 @@ def find_similar_players(df: pl.DataFrame, threshold: int = 90) -> pl.DataFrame:
 
     return similar_df
 
-
-def create_shortlist(df: pl.DataFrame):
-    player_stats = df.filter(pl.col("UID") == "85028014").select(
+def find_player_baseline(df: pl.DataFrame, uid: str) -> tuple[float, float]:
+    player_stats = df.filter(pl.col("UID") == uid).select(
         ["Chance Creation Rate", "Pass Completion Rate"]
     )
 
     player_chance_creation_rate = player_stats["Chance Creation Rate"][0]
     player_pass_completion_rate = player_stats["Pass Completion Rate"][0]
+
+    return player_chance_creation_rate, player_pass_completion_rate
+
+
+def create_shortlist(df: pl.DataFrame, uid: str) -> pl.DataFrame:
+    player_chance_creation_rate, player_pass_completion_rate = find_player_baseline(
+        df, uid
+    )
 
     shortlist_df = df.filter(
         (pl.col("Similarity") >= 90)
@@ -267,7 +274,7 @@ def main():
     similar_df = find_similar_players(players_df)
     similar_df.write_csv("replacing-pogba-1.3.csv")
 
-    shortlist_df = create_shortlist(players_df)
+    shortlist_df = create_shortlist(players_df, "85028014")
     shortlist_df.select(
         [
             "UID",
