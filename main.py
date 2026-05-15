@@ -177,6 +177,7 @@ def scale_similarity(similarity_scores: np.array) -> np.array:
 
     return similarity_scores_scaled
 
+
 def attach_similarity(df: pl.DataFrame, similarity_scores: np.array) -> pl.DataFrame:
     df = df.with_columns(
         [
@@ -235,6 +236,7 @@ def find_similar_players(df: pl.DataFrame, threshold: int = 90) -> pl.DataFrame:
 
     return similar_df
 
+
 def find_player_baseline(df: pl.DataFrame, uid: str) -> tuple[float, float]:
     player_stats = df.filter(pl.col("UID") == uid).select(
         ["Chance Creation Rate", "Pass Completion Rate"]
@@ -246,15 +248,24 @@ def find_player_baseline(df: pl.DataFrame, uid: str) -> tuple[float, float]:
     return player_chance_creation_rate, player_pass_completion_rate
 
 
+def filter_shortlist(
+    df: pl.DataFrame, chance_creation_rate: float, pass_completion_rate: float
+):
+    filtered_df = df.filter(
+        (pl.col("Chance Creation Rate") >= chance_creation_rate)
+        & (pl.col("Pass Completion Rate") >= pass_completion_rate)
+    )
+
+    return filtered_df
+
+
 def create_shortlist(df: pl.DataFrame, uid: str) -> pl.DataFrame:
     player_chance_creation_rate, player_pass_completion_rate = find_player_baseline(
         df, uid
     )
 
-    shortlist_df = df.filter(
-        (pl.col("Similarity") >= 90)
-        & (pl.col("Chance Creation Rate") >= player_chance_creation_rate)
-        & (pl.col("Pass Completion Rate") >= player_pass_completion_rate)
+    shortlist_df = filter_shortlist(
+        df, player_chance_creation_rate, player_pass_completion_rate
     )
 
     return shortlist_df
@@ -274,7 +285,7 @@ def main():
     similar_df = find_similar_players(players_df)
     similar_df.write_csv("replacing-pogba-1.3.csv")
 
-    shortlist_df = create_shortlist(players_df, "85028014")
+    shortlist_df = create_shortlist(similar_df, "85028014")
     shortlist_df.select(
         [
             "UID",

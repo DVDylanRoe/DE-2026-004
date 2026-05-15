@@ -1,6 +1,6 @@
 import pytest
 import polars as pl
-from main import create_shortlist, find_player_baseline
+from main import create_shortlist, find_player_baseline, filter_shortlist
 
 
 def test_create_shortlist():
@@ -79,6 +79,70 @@ def test_create_shortlist():
             },
         ]
     )
+    assert output_df.equals(expected_df)
+
+
+def test_create_shortlist():
+    input_df = pl.DataFrame(
+        [
+            {
+                "UID": "85028014",
+                "Name": "- - ",
+                "Club": "Man UFC",
+                "Similarity": 100.0,
+                "Chance Creation Rate": 0.003991130820399113,
+                "Pass Completion Rate": 0.8423608516996638,
+            },
+            {
+                "UID": "55070307",
+                "Name": "- - ",
+                "Club": "Wolves",
+                "Similarity": 98.72976250063027,
+                "Chance Creation Rate": 0.003627130939426913,
+                "Pass Completion Rate": 0.881675727534378,
+            },
+            {
+                "UID": "18077264",
+                "Name": "- - ",
+                "Club": "Leicester",
+                "Similarity": 98.66699603523566,
+                "Chance Creation Rate": 0.005043227665706052,
+                "Pass Completion Rate": 0.8499693815064299,
+            },
+            {
+                "UID": "91003875",
+                "Name": "- - ",
+                "Club": "Man City",
+                "Similarity": 98.41038467380066,
+                "Chance Creation Rate": 0.005832449628844115,
+                "Pass Completion Rate": 0.9010989010989011,
+            },
+            {
+                "UID": "85027988",
+                "Name": "- - ",
+                "Club": "Everton",
+                "Similarity": 98.28159586046512,
+                "Chance Creation Rate": 0.001257071024512885,
+                "Pass Completion Rate": 0.8870922776693616,
+            },
+        ]
+    )
+
+    output_df = filter_shortlist(input_df, 0.004, 0.9)
+
+    expected_df = pl.DataFrame(
+        [
+            {
+                "UID": "91003875",
+                "Name": "- - ",
+                "Club": "Man City",
+                "Similarity": 98.41038467380066,
+                "Chance Creation Rate": 0.005832449628844115,
+                "Pass Completion Rate": 0.9010989010989011,
+            },
+        ]
+    )
+
     assert output_df.equals(expected_df)
 
 
