@@ -270,22 +270,24 @@ def create_shortlist(df: pl.DataFrame, uid: str) -> pl.DataFrame:
 
     return shortlist_df
 
+def transform(df: pl.DataFrame, column_config: dataclass, uid: str):
+    transform_df = clean_data(df, column_config)
+    transform_df = add_dervied_columns(transform_df, column_config, uid)
+    similar_df = find_similar_players(transform_df)
+    shortlist_df = create_shortlist(similar_df, uid)
+    return transform_df, similar_df, shortlist_df
 
 def main():
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
     column_config = ColumnConfig()
 
     players_df = get_players_data(file_path)
+
+    transform_df, similar_df, shortlist_df = transform(players_df, column_config, "85028014")
+    
     players_df.write_csv("players-raw.csv")
-
-    players_df = clean_data(players_df, column_config)
-    players_df = add_dervied_columns(players_df, column_config, "85028014")
-    players_df.write_csv("replacing-pogba-1.1.csv")
-
-    similar_df = find_similar_players(players_df)
+    transform_df.write_csv("replacing-pogba-1.1.csv")
     similar_df.write_csv("replacing-pogba-1.3.csv")
-
-    shortlist_df = create_shortlist(similar_df, "85028014")
     shortlist_df.select(
         [
             "UID",
