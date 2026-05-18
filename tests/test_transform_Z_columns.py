@@ -1,14 +1,17 @@
-from main import transform_Z_columns
+from main import transform_Z_columns, TransformContext, ColumnConfig
 import polars as pl
 
 
 def test_transform_Z_columns():
-    # input
     PER_90_COLS = [
         "Hdrs A per 90",
         "Clear per 90",
         "Cr A per 90",
     ]
+    transform_context = TransformContext(
+        ColumnConfig(per_ninety_columns=PER_90_COLS), "85028014"
+    )
+    # input
 
     input_df = pl.DataFrame(
         [
@@ -45,7 +48,7 @@ def test_transform_Z_columns():
         ]
     )
 
-    output_df = transform_Z_columns(input_df, PER_90_COLS)
+    output_df = transform_Z_columns(input_df, transform_context)
 
     expected_df = pl.DataFrame(
         [

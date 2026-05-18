@@ -1,16 +1,18 @@
-from main import transform, ColumnConfig
+from main import transform, ColumnConfig, TransformContext
 import polars as pl
 from polars.testing import assert_frame_equal
 from pathlib import Path
 
 
 def test_transform():
+    transform_context = TransformContext(ColumnConfig(), "85028014")
+
     fixture_dir = Path(__file__).parent / "golden"
     input_file_path = fixture_dir / "players-raw.csv"
     input = pl.read_csv(input_file_path, dtypes={"UID": pl.Utf8})
 
     output_transform, output_similar, output_shortlist = transform(
-        input, ColumnConfig, "85028014"
+        input, transform_context
     )
 
     expcted_transform_file_path = fixture_dir / "replacing-pogba-1.1.csv"

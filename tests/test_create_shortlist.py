@@ -1,6 +1,12 @@
 import pytest
 import polars as pl
-from main import create_shortlist, find_player_baseline, filter_shortlist
+from main import (
+    ColumnConfig,
+    TransformContext,
+    create_shortlist,
+    find_player_baseline,
+    filter_shortlist,
+)
 
 
 def test_create_shortlist():
@@ -147,6 +153,8 @@ def test_create_shortlist():
 
 
 def test_find_player_baseline():
+    transform_context = TransformContext(ColumnConfig(), "85028014")
+
     input_df = pl.DataFrame(
         [
             {
@@ -177,7 +185,9 @@ def test_find_player_baseline():
         ]
     )
 
-    output_ccr, output_pcr = find_player_baseline(input_df, "85028014")
+    output_ccr, output_pcr = find_player_baseline(
+        input_df, transform_context
+    )  # 85028014
 
     assert output_ccr == 0.003991130820399113
     assert output_pcr == 0.8423608516996638

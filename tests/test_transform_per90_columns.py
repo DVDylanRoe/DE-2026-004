@@ -1,8 +1,27 @@
-from main import transform_per90_columns
+from main import transform_per90_columns, TransformContext, ColumnConfig
 import polars as pl
 
 
 def test_transform_per90_columns():
+    per_ninety_source_columns = (
+        "Hdrs A",
+        "Clear",
+        "Cr A",
+        "Drb",
+        "FA",
+        "Itc",
+        "Pas A",
+        "Ps C",
+        "Non Penalty Shots",
+        "Tck A",
+        "Yel",
+        "Red",
+        "Fls",
+    )
+    transform_context = TransformContext(
+        ColumnConfig(per_ninety_source_columns=per_ninety_source_columns), "85028014"
+    )
+
     input_df = pl.DataFrame(
         [
             {
@@ -59,23 +78,7 @@ def test_transform_per90_columns():
         ]
     )
 
-    per_ninety_source_columns = (
-        "Hdrs A",
-        "Clear",
-        "Cr A",
-        "Drb",
-        "FA",
-        "Itc",
-        "Pas A",
-        "Ps C",
-        "Non Penalty Shots",
-        "Tck A",
-        "Yel",
-        "Red",
-        "Fls",
-    )
-
-    output_df = transform_per90_columns(input_df, per_ninety_source_columns)
+    output_df = transform_per90_columns(input_df, transform_context)
 
     expected_df = pl.DataFrame(
         [

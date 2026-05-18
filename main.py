@@ -57,6 +57,12 @@ class ColumnConfig:
     )
 
 
+@dataclass(frozen=True)
+class TransformContext:
+    config: ColumnConfig
+    uid: str
+
+
 def read_html(file_path: str):
     with open(file_path, encoding="utf-8") as file:
         html = file.read()
@@ -137,37 +143,39 @@ def add_nineties_played(df):
     return df
 
 
-def transform_per90_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
+def transform_per90_columns(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
     df = df.with_columns(
         [
             (pl.col(column) / pl.col("90s")).alias(f"{column} per 90")
-            for column in columns
+            for column in context.config.per_ninety_source_columns
         ]
     )
 
     return df
 
 
-def transform_Z_columns(df: pl.DataFrame, per_ninety_columns: tuple) -> pl.DataFrame:
+def transform_Z_columns(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
 
     df = df.with_columns(
         [
             ((pl.col(column) - pl.mean(column)) / pl.std(column)).alias(f"{column} Z")
-            for column in per_ninety_columns
+            for column in context.config.per_ninety_columns
         ]
     )
 
     return df
 
 
-def extract_player_vector(df: pl.DataFrame, uid: str, columns: list[str]) -> np.array:
-    player = df.filter(pl.col("UID") == uid).select(columns)
+def extract_player_vector(df: pl.DataFrame, context: dataclass) -> np.array:
+    player = df.filter(pl.col("UID") == context.uid).select(
+        context.config.zscore_feature_columns
+    )
     player_vector = player.to_numpy().astype(float)
     return player_vector
 
 
-def extract_feature_matrix(df: pl.DataFrame, columns: list[str]) -> np.array:
-    feature_matrix = df.select(columns).to_numpy()
+def extract_feature_matrix(df: pl.DataFrame, context: dataclass) -> np.array:
+    feature_matrix = df.select(context.config.zscore_feature_columns).to_numpy()
 
     return feature_matrix
 
@@ -188,10 +196,10 @@ def attach_similarity(df: pl.DataFrame, similarity_scores: np.array) -> pl.DataF
     return df
 
 
-def compute_similarity(df: pl.DataFrame, uid: str, columns: list[str]) -> pl.DataFrame:
-    player_vector = extract_player_vector(df, uid, columns)
+def compute_similarity(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
+    player_vector = extract_player_vector(df, context)
 
-    feature_matrix = extract_feature_matrix(df, columns)
+    feature_matrix = extract_feature_matrix(df, context)
 
     cosine_similarity_scores = cosine_similarity(
         feature_matrix, player_vector
@@ -217,13 +225,13 @@ def add_pass_completion_rate(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-def add_dervied_columns(df: pl.DataFrame, Config: dataclass, uid: str):
+def add_dervied_columns(df: pl.DataFrame, context: dataclass):
     df = add_tackles_attempted(df)
     df = add_non_penalty_shots(df)
     df = add_nineties_played(df)
-    df = transform_per90_columns(df, Config.per_ninety_source_columns)
-    df = transform_Z_columns(df, Config.per_ninety_columns)
-    df = compute_similarity(df, uid, Config.zscore_feature_columns)
+    df = transform_per90_columns(df, context)
+    df = transform_Z_columns(df, context)
+    df = compute_similarity(df, context)
     df = add_chance_creation_rate(df)
     df = add_pass_completion_rate(df)
 
@@ -237,8 +245,8 @@ def find_similar_players(df: pl.DataFrame, threshold: int = 90) -> pl.DataFrame:
     return similar_df
 
 
-def find_player_baseline(df: pl.DataFrame, uid: str) -> tuple[float, float]:
-    player_stats = df.filter(pl.col("UID") == uid).select(
+def find_player_baseline(df: pl.DataFrame, context: dataclass) -> tuple[float, float]:
+    player_stats = df.filter(pl.col("UID") == context.uid).select(
         ["Chance Creation Rate", "Pass Completion Rate"]
     )
 
@@ -259,9 +267,9 @@ def filter_shortlist(
     return filtered_df
 
 
-def create_shortlist(df: pl.DataFrame, uid: str) -> pl.DataFrame:
+def create_shortlist(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
     player_chance_creation_rate, player_pass_completion_rate = find_player_baseline(
-        df, uid
+        df, context
     )
 
     shortlist_df = filter_shortlist(
@@ -271,11 +279,11 @@ def create_shortlist(df: pl.DataFrame, uid: str) -> pl.DataFrame:
     return shortlist_df
 
 
-def transform(df: pl.DataFrame, column_config: dataclass, uid: str):
-    transform_df = clean_data(df, column_config)
-    transform_df = add_dervied_columns(transform_df, column_config, uid)
+def transform(df: pl.DataFrame, context: dataclass):
+    transform_df = clean_data(df, context.config)
+    transform_df = add_dervied_columns(transform_df, context)
     similar_df = find_similar_players(transform_df)
-    shortlist_df = create_shortlist(similar_df, uid)
+    shortlist_df = create_shortlist(similar_df, context)
     return transform_df, similar_df, shortlist_df
 
 
@@ -298,12 +306,11 @@ def load(players_df, transform_df, similar_df, shortlist_df):
 def main():
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
     column_config = ColumnConfig()
+    transform_context = TransformContext(column_config, "85028014")
 
     players_df = get_players_data(file_path)
 
-    transform_df, similar_df, shortlist_df = transform(
-        players_df, column_config, "85028014"
-    )
+    transform_df, similar_df, shortlist_df = transform(players_df, transform_context)
 
     load(players_df, transform_df, similar_df, shortlist_df)
 
