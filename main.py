@@ -63,6 +63,12 @@ class TransformContext:
     uid: str
 
 
+@dataclass(frozen=True)
+class Baseline:
+    chance_creation_rate: float
+    pass_completion_rate: float
+
+
 def read_html(file_path: str):
     with open(file_path, encoding="utf-8") as file:
         html = file.read()
@@ -253,27 +259,30 @@ def find_player_baseline(df: pl.DataFrame, context: dataclass) -> tuple[float, f
     player_chance_creation_rate = player_stats["Chance Creation Rate"][0]
     player_pass_completion_rate = player_stats["Pass Completion Rate"][0]
 
-    return player_chance_creation_rate, player_pass_completion_rate
+    player_baseline = Baseline(
+        chance_creation_rate=player_chance_creation_rate,
+        pass_completion_rate=player_pass_completion_rate,
+    )
+
+    return player_baseline
 
 
-def filter_shortlist(
-    df: pl.DataFrame, chance_creation_rate: float, pass_completion_rate: float
-):
+def filter_shortlist(df: pl.DataFrame, baseline: dataclass):
     filtered_df = df.filter(
-        (pl.col("Chance Creation Rate") >= chance_creation_rate)
-        & (pl.col("Pass Completion Rate") >= pass_completion_rate)
+        (pl.col("Chance Creation Rate") >= baseline.chance_creation_rate)
+        & (pl.col("Pass Completion Rate") >= baseline.pass_completion_rate)
     )
 
     return filtered_df
 
 
 def create_shortlist(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
-    player_chance_creation_rate, player_pass_completion_rate = find_player_baseline(
+    player_baseline = find_player_baseline(
         df, context
     )
 
     shortlist_df = filter_shortlist(
-        df, player_chance_creation_rate, player_pass_completion_rate
+        df, player_baseline
     )
 
     return shortlist_df

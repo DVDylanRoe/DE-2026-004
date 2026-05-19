@@ -3,6 +3,7 @@ import polars as pl
 from main import (
     ColumnConfig,
     TransformContext,
+    Baseline,
     create_shortlist,
     find_player_baseline,
     filter_shortlist,
@@ -134,7 +135,9 @@ def test_create_shortlist():
         ]
     )
 
-    output_df = filter_shortlist(input_df, 0.004, 0.9)
+    player_baseline = Baseline(chance_creation_rate=0.004, pass_completion_rate=0.9)
+
+    output_df = filter_shortlist(input_df, player_baseline)
 
     expected_df = pl.DataFrame(
         [
@@ -185,9 +188,7 @@ def test_find_player_baseline():
         ]
     )
 
-    output_ccr, output_pcr = find_player_baseline(
-        input_df, transform_context
-    )  # 85028014
+    player_baseline = find_player_baseline(input_df, transform_context)  # 85028014
 
-    assert output_ccr == 0.003991130820399113
-    assert output_pcr == 0.8423608516996638
+    assert player_baseline.chance_creation_rate == 0.003991130820399113
+    assert player_baseline.pass_completion_rate == 0.8423608516996638
