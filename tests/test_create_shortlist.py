@@ -1,9 +1,11 @@
 import pytest
 import polars as pl
-from main import (
+from config import (
     ColumnConfig,
     TransformContext,
     Baseline,
+)
+from shortlist import (
     create_shortlist,
     find_player_baseline,
     filter_shortlist,

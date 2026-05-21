@@ -1,4 +1,4 @@
-from main import get_players_data
+from inputOutput import get_players_data
 import filecmp
 from pathlib import Path
 import polars as pl

@@ -1,8 +1,10 @@
 import polars as pl
 import numpy as np
-from main import (
+from config import (
     ColumnConfig,
     TransformContext,
+)
+from similarity import (
     extract_player_vector,
     extract_feature_matrix,
     scale_similarity,
