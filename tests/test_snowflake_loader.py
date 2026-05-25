@@ -1,4 +1,4 @@
-from snowflake_loader import get_connection, land_data
+from snowflake_loader import get_connection, stage_data, copy_data_into_table
 from unittest.mock import patch, MagicMock
 import pytest
 
@@ -36,11 +36,21 @@ def test_get_connection(mock_connect):
     )
 
 
-def test_land_data(mock_connect):
+def test_stage_data(mock_connect):
     put_cmd = "PUT file:///tmp/data/file* @%testtable"
 
-    land_data(mock_connect, put_cmd)
+    stage_data(mock_connect, put_cmd)
 
     mock_cursor = mock_connect.cursor.return_value
 
     mock_cursor.execute.assert_called_once_with(put_cmd)
+
+
+def test_copy_data_into_table(mock_connect):
+    copy_cmd = "COPY INTO testtable"
+
+    copy_data_into_table(mock_connect, copy_cmd)
+
+    mock_cursor = mock_connect.cursor.return_value
+
+    mock_cursor.execute.assert_called_once_with(copy_cmd)
