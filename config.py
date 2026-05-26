@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 
 
 @dataclass(frozen=True)
@@ -63,3 +64,14 @@ class TransformContext:
 class Baseline:
     chance_creation_rate: float
     pass_completion_rate: float
+
+
+@dataclass(frozen=True)
+class SnowflakeCredentials:
+    account: str = os.getenv("SNOWFLAKE_ACCOUNT")
+    user: str = os.getenv("SNOWFLAKE_USER")
+    authenticator: str = os.getenv("SNOWFLAKE_AUTHENTICATOR")
+    role: str = os.getenv("SNOWFLAKE_ROLE")
+    warehouse: str = os.getenv("SNOWFLAKE_WAREHOUSE")
+    database: str = os.getenv("SNOWFLAKE_DATABASE")
+    schema: str = os.getenv("SNOWFLAKE_SCHEMA")

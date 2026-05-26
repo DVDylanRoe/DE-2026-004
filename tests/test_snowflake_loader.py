@@ -1,6 +1,7 @@
 from snowflake_loader import get_connection, stage_data, copy_data_into_table
 from unittest.mock import patch, MagicMock
 import pytest
+from config import SnowflakeCredentials
 
 
 @pytest.fixture
@@ -13,15 +14,15 @@ def mock_connect():
 
 @patch("snowflake_loader.snowflake.connector.connect")
 def test_get_connection(mock_connect):
-    credentials = {
-        "account": "constant",
-        "user": "rocket",
-        "authenticator": "helmet",
-        "role": "multiply",
-        "warehouse": "please",
-        "database": "embarrassment",
-        "schema": "offspring",
-    }
+    credentials = SnowflakeCredentials(
+        account = "constant",
+        user = "rocket",
+        authenticator = "helmet",
+        role = "multiply",
+        warehouse = "please",
+        database = "embarrassment",
+        schema = "offspring",
+    )
 
     get_connection(credentials)
 
