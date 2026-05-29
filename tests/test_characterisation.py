@@ -10,7 +10,7 @@ def test_characterisation(tmp_path, monkeypatch):
     
     (tmp_path / "data").mkdir()
 
-    main.main()
+    main.main(load_sf=False)
 
     expected_files = [
         "players_raw.csv",

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import os
+from pathlib import Path
+import polars as pl
 
 
 @dataclass(frozen=True)
@@ -75,3 +77,14 @@ class SnowflakeCredentials:
     warehouse: str = os.getenv("SNOWFLAKE_WAREHOUSE")
     database: str = os.getenv("SNOWFLAKE_DATABASE")
     schema: str = os.getenv("SNOWFLAKE_SCHEMA")
+
+
+@dataclass
+class LoadTarget:
+    table: str
+    df: pl.DataFrame
+    csv_path: Path
+
+    @property
+    def csv_path_str(self):
+        return str(self.csv_path)
