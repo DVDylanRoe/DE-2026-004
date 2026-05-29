@@ -1,4 +1,5 @@
 import snowflake.connector
+from pathlib import Path
 
 
 def get_connection(credentials):
@@ -13,6 +14,20 @@ def get_connection(credentials):
     )
 
     return conn
+
+
+def generate_put_command(source_file_path: str, target_table: str) -> str:
+    p = Path(source_file_path)
+    source_uri = "file://" + p.as_posix()
+
+    put_cmd = f"""
+        PUT '{source_uri}'
+        @%{target_table}
+        AUTO_COMPRESS=TRUE
+        OVERWRITE=TRUE;
+        """
+
+    return put_cmd
 
 
 def stage_data(connection, put_command):

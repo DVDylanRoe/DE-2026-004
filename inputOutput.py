@@ -33,6 +33,6 @@ def get_players_data(file_path: str) -> pl.DataFrame:
     return players_df
 
 
-def load(players_df, transform_df, similar_df, shortlist_df):
+def load(players_df, transform_df):
     players_df.write_csv("data\\players_raw.csv")
     transform_df.write_csv("data\\players_transformed.csv")

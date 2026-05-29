@@ -12,7 +12,7 @@ def main():
 
     transform_df, similar_df, shortlist_df = transform(players_df, transform_context)
 
-    load(players_df, transform_df, similar_df, shortlist_df)
+    load(players_df, transform_df)
 
 
 if __name__ == "__main__":
