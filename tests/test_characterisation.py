@@ -13,10 +13,8 @@ def test_characterisation(tmp_path, monkeypatch):
     main.main()
 
     expected_files = [
-        "players-raw.csv",
-        "replacing-pogba-1.1.csv",
-        "replacing-pogba-1.3.csv",
-        "replacing-pogba-1.5.csv",
+        "players_raw.csv",
+        "players_transformed.csv",
     ]
 
     golden_dir = Path(__file__).parent / "golden"

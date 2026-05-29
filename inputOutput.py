@@ -34,16 +34,5 @@ def get_players_data(file_path: str) -> pl.DataFrame:
 
 
 def load(players_df, transform_df, similar_df, shortlist_df):
-    players_df.write_csv("data\\players-raw.csv")
-    transform_df.write_csv("data\\replacing-pogba-1.1.csv")
-    similar_df.write_csv("data\\replacing-pogba-1.3.csv")
-    shortlist_df.select(
-        [
-            "UID",
-            "Name",
-            "Club",
-            "Similarity",
-            "Chance Creation Rate",
-            "Pass Completion Rate",
-        ]
-    ).write_csv("data\\replacing-pogba-1.5.csv")
+    players_df.write_csv("data\\players_raw.csv")
+    transform_df.write_csv("data\\players_transformed.csv")
