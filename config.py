@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 from pathlib import Path
 import polars as pl
@@ -70,13 +70,15 @@ class Baseline:
 
 @dataclass(frozen=True)
 class SnowflakeCredentials:
-    account: str = os.getenv("SNOWFLAKE_ACCOUNT")
-    user: str = os.getenv("SNOWFLAKE_USER")
-    authenticator: str = os.getenv("SNOWFLAKE_AUTHENTICATOR")
-    role: str = os.getenv("SNOWFLAKE_ROLE")
-    warehouse: str = os.getenv("SNOWFLAKE_WAREHOUSE")
-    database: str = os.getenv("SNOWFLAKE_DATABASE")
-    schema: str = os.getenv("SNOWFLAKE_SCHEMA")
+    account: str = field(default_factory=lambda: os.getenv("SNOWFLAKE_ACCOUNT"))
+    user: str = field(default_factory=lambda: os.getenv("SNOWFLAKE_USER"))
+    authenticator: str = field(
+        default_factory=lambda: os.getenv("SNOWFLAKE_AUTHENTICATOR")
+    )
+    role: str = field(default_factory=lambda: os.getenv("SNOWFLAKE_ROLE"))
+    warehouse: str = field(default_factory=lambda: os.getenv("SNOWFLAKE_WAREHOUSE"))
+    database: str = field(default_factory=lambda: os.getenv("SNOWFLAKE_DATABASE"))
+    schema: str = field(default_factory=lambda: os.getenv("SNOWFLAKE_SCHEMA"))
 
 
 @dataclass

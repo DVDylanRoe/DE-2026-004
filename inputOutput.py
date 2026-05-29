@@ -6,6 +6,7 @@ from snowflake_loader import (
     stage_data,
     generate_copy_command,
     copy_data_into_table,
+    truncate_table,
 )
 from config import LoadTarget
 
@@ -57,6 +58,8 @@ def load_to_snowflake(credentials, targets: list[LoadTarget]):
         if target.table:
             put_cmd = generate_put_command(target.csv_path_str, target.table)
             stage_data(conn, put_cmd)
+
+            truncate_table(conn, target.table)
 
             copy_cmd = generate_copy_command(target.table)
             copy_data_into_table(conn, copy_cmd)

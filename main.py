@@ -29,7 +29,7 @@ def main(load_sf=True):
     targets = [
         LoadTarget(None, players_df, Path("data/players_raw.csv").resolve()),
         LoadTarget(
-            "players_transformed" if load_sf else None,
+            "players" if load_sf else None,
             transform_df,
             Path("data/players_transformed.csv").resolve(),
         ),

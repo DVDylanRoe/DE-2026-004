@@ -51,6 +51,12 @@ def generate_copy_command(target_table):
     return copy_cmd
 
 
+def truncate_table(connection, target_table):
+    cur = connection.cursor()
+
+    cur.execute(f"TRUNCATE {target_table}")
+
+
 def copy_data_into_table(connection, copy_command):
     cur = connection.cursor()
 
