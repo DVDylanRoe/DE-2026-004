@@ -7,6 +7,8 @@ import main
 def test_characterisation(tmp_path, monkeypatch):
 
     monkeypatch.chdir(tmp_path)
+    
+    (tmp_path / "data").mkdir()
 
     main.main()
 
@@ -20,11 +22,10 @@ def test_characterisation(tmp_path, monkeypatch):
     golden_dir = Path(__file__).parent / "golden"
 
     for filename in expected_files:
-        produced = tmp_path / filename
+        produced = tmp_path / "data" / filename
         golden = golden_dir / filename
 
         assert produced.exists(), f"Expected output {filename} was not created"
-
         assert golden.exists(), f"Golden file missing: {golden}"
 
         assert filecmp.cmp(produced, golden, shallow=False), (

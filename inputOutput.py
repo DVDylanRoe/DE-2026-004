@@ -34,9 +34,9 @@ def get_players_data(file_path: str) -> pl.DataFrame:
 
 
 def load(players_df, transform_df, similar_df, shortlist_df):
-    players_df.write_csv("players-raw.csv")
-    transform_df.write_csv("replacing-pogba-1.1.csv")
-    similar_df.write_csv("replacing-pogba-1.3.csv")
+    players_df.write_csv("data\\players-raw.csv")
+    transform_df.write_csv("data\\replacing-pogba-1.1.csv")
+    similar_df.write_csv("data\\replacing-pogba-1.3.csv")
     shortlist_df.select(
         [
             "UID",
@@ -46,4 +46,4 @@ def load(players_df, transform_df, similar_df, shortlist_df):
             "Chance Creation Rate",
             "Pass Completion Rate",
         ]
-    ).write_csv("replacing-pogba-1.5.csv")
+    ).write_csv("data\\replacing-pogba-1.5.csv")
