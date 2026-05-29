@@ -3,6 +3,7 @@ from snowflake_loader import (
     stage_data,
     copy_data_into_table,
     generate_put_command,
+    generate_copy_command,
 )
 from unittest.mock import patch, MagicMock
 import pytest
@@ -76,3 +77,22 @@ def test_generate_put_command():
         """
 
     assert put_cmd == expected_put_cmd
+
+
+def test_generate_copy_command():
+    target_table = "squid"
+
+    copy_cmd = generate_copy_command(target_table)
+
+    expected_copy_cmd = """
+        COPY INTO squid
+        FROM @%squid
+        FILE_FORMAT = (
+            TYPE = CSV
+            FIELD_DELIMITER = ','
+            FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+            SKIP_HEADER = 1
+        )
+    """
+
+    assert copy_cmd == expected_copy_cmd

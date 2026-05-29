@@ -35,7 +35,20 @@ def stage_data(connection, put_command):
     cur.execute(put_command)
     cur.close()
 
-    return "success"
+
+def generate_copy_command(target_table):
+    copy_cmd = f"""
+        COPY INTO {target_table}
+        FROM @%{target_table}
+        FILE_FORMAT = (
+            TYPE = CSV
+            FIELD_DELIMITER = ','
+            FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+            SKIP_HEADER = 1
+        )
+    """
+
+    return copy_cmd
 
 
 def copy_data_into_table(connection, copy_command):
