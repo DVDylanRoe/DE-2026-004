@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 import os
 from pathlib import Path
 import polars as pl
-
+import yaml
 
 @dataclass(frozen=True)
 class ColumnConfig:
@@ -90,3 +90,8 @@ class LoadTarget:
     @property
     def csv_path_str(self):
         return str(self.csv_path)
+
+def load_yaml(yaml_path):
+    with open(yaml_path) as yaml_file:
+        yaml_contents =  yaml.safe_load(yaml_file)
+    return yaml_contents
