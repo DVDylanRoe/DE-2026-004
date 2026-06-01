@@ -95,3 +95,7 @@ def load_yaml(yaml_path):
     with open(yaml_path) as yaml_file:
         yaml_contents =  yaml.safe_load(yaml_file)
     return yaml_contents
+
+def resolve_uid(yaml_config, cli_arguments):
+    uid = cli_arguments.uid if cli_arguments.uid else yaml_config["uid"]
+    return uid
