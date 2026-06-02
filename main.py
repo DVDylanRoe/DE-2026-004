@@ -5,8 +5,12 @@ from config import (
     Baseline,
     SnowflakeCredentials,
     LoadTarget,
+    load_yaml,
+    resolve_uid
 )
 from pipeline import transform
+from cli import build_parser
+
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -18,9 +22,18 @@ def main(load_sf=True):
     else:
         credentials = None
 
+    parser = build_parser()
+    args = parser.parse_args()
+
+    config_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\config.yaml"
+
+    config = load_yaml(config_path)
+
+    uid = str(resolve_uid(config, args))
+
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
     column_config = ColumnConfig()
-    transform_context = TransformContext(column_config, "85028014")
+    transform_context = TransformContext(column_config, uid)
 
     players_df = get_players_data(file_path)
 
