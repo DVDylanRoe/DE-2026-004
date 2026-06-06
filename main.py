@@ -6,13 +6,14 @@ from config import (
     SnowflakeCredentials,
     LoadTarget,
     load_yaml,
-    resolve_uid
+    resolve_uid,
 )
 from pipeline import transform
 from cli import build_parser
 
 from dotenv import load_dotenv
 from pathlib import Path
+import os
 
 
 def main(load_sf=True):
@@ -25,26 +26,28 @@ def main(load_sf=True):
     parser = build_parser()
     args = parser.parse_args()
 
-    config_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\config.yaml"
-
+    config_path = Path(__file__).parent / "config.yaml"
     config = load_yaml(config_path)
+    
+    if "PYTEST_CURRENT_TEST" in os.environ:
+        fixture_html = Path(__file__).parent / "tests" / "fixtures" / "players.html"
+        config["input_html"] = str(fixture_html)
 
     uid = str(resolve_uid(config, args))
 
-    file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\players_20220522.html"
     column_config = ColumnConfig()
     transform_context = TransformContext(column_config, uid)
 
-    players_df = get_players_data(file_path)
+    players_df = get_players_data(Path(config["input_html"]).resolve())
 
     transform_df, similar_df, shortlist_df = transform(players_df, transform_context)
 
     targets = [
-        LoadTarget(None, players_df, Path("data/players_raw.csv").resolve()),
+        LoadTarget(None, players_df, Path(config["output_raw"]).resolve()),
         LoadTarget(
             "players" if load_sf else None,
             transform_df,
-            Path("data/players_transformed.csv").resolve(),
+            Path(config["output_transformed"]).resolve(),
         ),
     ]
 

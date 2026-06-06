@@ -2,13 +2,17 @@ import filecmp
 from pathlib import Path
 import pytest
 import main
+import sys
 
 
 def test_characterisation(tmp_path, monkeypatch):
 
     monkeypatch.chdir(tmp_path)
-    
+
     (tmp_path / "data").mkdir()
+
+    monkeypatch.setenv("PYTHONPATH", "")
+    monkeypatch.setattr(sys, "argv", ["prog"])
 
     main.main(load_sf=False)
 

@@ -1,1 +1,5 @@
+input_html: players_20220522.html
+output_raw: data/players_raw.csv
+output_transformed: data/players_transformed.csv
+
 uid: 85028014
