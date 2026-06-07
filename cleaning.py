@@ -1,5 +1,6 @@
 import polars as pl
 from dataclasses import dataclass
+from config import ColumnConfig
 
 
 def clean_numeric_string_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataFrame:
@@ -25,7 +26,7 @@ def convert_percentage_columns(df: pl.DataFrame, columns: list[str]) -> pl.DataF
     return df
 
 
-def clean_data(df: pl.DataFrame, Config: dataclass):
+def clean_data(df: pl.DataFrame, Config: ColumnConfig):
     df = clean_numeric_string_columns(df, Config.numeric_string_columns)
     df = cast_numeric_columns(df, Config.numeric_columns)
     df = convert_percentage_columns(df, Config.percentage_columns)

@@ -1,6 +1,7 @@
 import polars as pl
 from dataclasses import dataclass
 from similarity import compute_similarity
+from config import TransformContext
 
 
 def add_tackles_attempted(df):
@@ -21,7 +22,7 @@ def add_nineties_played(df):
     return df
 
 
-def transform_per90_columns(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
+def transform_per90_columns(df: pl.DataFrame, context: TransformContext) -> pl.DataFrame:
     df = df.with_columns(
         [
             (pl.col(column) / pl.col("90s")).alias(f"{column} per 90")
@@ -32,7 +33,7 @@ def transform_per90_columns(df: pl.DataFrame, context: dataclass) -> pl.DataFram
     return df
 
 
-def transform_Z_columns(df: pl.DataFrame, context: dataclass) -> pl.DataFrame:
+def transform_Z_columns(df: pl.DataFrame, context: TransformContext) -> pl.DataFrame:
 
     df = df.with_columns(
         [
@@ -57,7 +58,7 @@ def add_pass_completion_rate(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-def add_dervied_columns(df: pl.DataFrame, context: dataclass):
+def add_dervied_columns(df: pl.DataFrame, context: TransformContext):
     df = add_tackles_attempted(df)
     df = add_non_penalty_shots(df)
     df = add_nineties_played(df)

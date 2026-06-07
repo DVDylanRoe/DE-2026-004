@@ -2,7 +2,6 @@ from inputOutput import get_players_data, load_to_snowflake
 from config import (
     ColumnConfig,
     TransformContext,
-    Baseline,
     SnowflakeCredentials,
     LoadTarget,
     load_yaml,

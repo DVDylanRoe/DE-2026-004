@@ -2,9 +2,10 @@ import polars as pl
 from dataclasses import dataclass
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from config import TransformContext
 
 
-def extract_player_vector(df: pl.DataFrame, context: dataclass) -> np.array:
+def extract_player_vector(df: pl.DataFrame, context: TransformContext) -> np.array:
     player = df.filter(pl.col("UID") == context.uid).select(
         context.config.zscore_feature_columns
     )
@@ -12,7 +13,7 @@ def extract_player_vector(df: pl.DataFrame, context: dataclass) -> np.array:
     return player_vector
 
 
-def extract_feature_matrix(df: pl.DataFrame, context: dataclass) -> np.array:
+def extract_feature_matrix(df: pl.DataFrame, context: TransformContext) -> np.array:
     feature_matrix = df.select(context.config.zscore_feature_columns).to_numpy()
 
     return feature_matrix
