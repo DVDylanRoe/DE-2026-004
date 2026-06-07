@@ -22,7 +22,9 @@ def add_nineties_played(df):
     return df
 
 
-def transform_per90_columns(df: pl.DataFrame, context: TransformContext) -> pl.DataFrame:
+def transform_per90_columns(
+    df: pl.DataFrame, context: TransformContext
+) -> pl.DataFrame:
     df = df.with_columns(
         [
             (pl.col(column) / pl.col("90s")).alias(f"{column} per 90")
@@ -43,6 +45,7 @@ def transform_Z_columns(df: pl.DataFrame, context: TransformContext) -> pl.DataF
     )
 
     return df
+
 
 def add_chance_creation_rate(df: pl.DataFrame) -> pl.DataFrame:
     df = df.with_columns((pl.col("CCC") / pl.col("Ps C")).alias("Chance Creation Rate"))
@@ -68,4 +71,37 @@ def add_dervied_columns(df: pl.DataFrame, context: TransformContext):
     df = add_chance_creation_rate(df)
     df = add_pass_completion_rate(df)
 
+    return df
+
+
+def add_features(df: pl.DataFrame, context: TransformContext) -> pl.DataFrame:
+    df = (
+        df.with_columns(
+            [
+                (pl.col("Tck W") / pl.col("Tck R")).alias("Tck A"),
+                (pl.col("Shots") - pl.col("Pens")).alias("Non Penalty Shots"),
+                (pl.col("Mins") / 90).alias("90s"),
+            ]
+        )
+        .with_columns(
+            [
+                (pl.col(column) / pl.col("90s")).alias(f"{column} per 90")
+                for column in context.config.per_ninety_source_columns
+            ]
+        )
+        .with_columns(
+            [
+                ((pl.col(column) - pl.mean(column)) / pl.std(column)).alias(
+                    f"{column} Z"
+                )
+                for column in context.config.per_ninety_columns
+            ]
+        )
+        .with_columns(
+            [
+                (pl.col("CCC") / pl.col("Ps C")).alias("Chance Creation Rate"),
+                (pl.col("Ps C") / pl.col("Pas A")).alias("Pass Completion Rate"),
+            ]
+        )
+    )
     return df
