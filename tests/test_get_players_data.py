@@ -1,15 +1,15 @@
-from inputOutput import get_players_data
 import filecmp
 from pathlib import Path
 import polars as pl
+import html_reader
 
 
 def test_get_players_data():
     file_path = r"C:\Users\d_roe\Documents\VS Code Projects\Portfolio\DE-2026-004\tests\fixtures\players.html"
 
-    output = get_players_data(file_path)
+    output = html_reader.get_players_data(file_path)
 
-    df = get_players_data(file_path)
+    df = html_reader.get_players_data(file_path)
 
     expected_schema = [
         "UID",

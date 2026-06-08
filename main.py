@@ -1,4 +1,5 @@
-from inputOutput import get_players_data, load_to_snowflake
+from html_reader import get_players_data
+from loaders import load_to_snowflake
 from config import (
     ColumnConfig,
     TransformContext,
