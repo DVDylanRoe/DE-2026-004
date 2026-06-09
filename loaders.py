@@ -8,6 +8,7 @@ from snowflake_loader import (
 )
 from config import LoadTarget
 
+
 def load(players_df, transform_df):
     players_df.write_csv("data\\players_raw.csv")
     transform_df.write_csv("data\\players_transformed.csv")
@@ -32,3 +33,8 @@ def load_to_snowflake(credentials, targets: list[LoadTarget]):
 
     if conn:
         conn.close()
+
+
+def write_targets(targets):
+    for target in targets:
+        target.df.write_csv(target.csv_path)
