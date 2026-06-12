@@ -1,5 +1,5 @@
 from html_reader import get_players_data
-from loaders import load_to_snowflake
+from loaders import SnowflakeClient, write_targets
 from config import (
     ColumnConfig,
     TransformContext,
@@ -17,18 +17,12 @@ import os
 
 
 def main(load_sf=True):
-    if load_sf:
-        load_dotenv()
-        credentials = SnowflakeCredentials()
-    else:
-        credentials = None
-
     parser = build_parser()
     args = parser.parse_args()
 
     config_path = Path(__file__).parent / "config.yaml"
     config = load_yaml(config_path)
-    
+
     if "PYTEST_CURRENT_TEST" in os.environ:
         fixture_html = Path(__file__).parent / "tests" / "fixtures" / "players.html"
         config["input_html"] = str(fixture_html)
@@ -51,7 +45,13 @@ def main(load_sf=True):
         ),
     ]
 
-    load_to_snowflake(credentials, targets)
+    write_targets(targets)
+
+    if load_sf:
+        load_dotenv()
+        credentials = SnowflakeCredentials()
+        snowflake_client = SnowflakeClient(credentials)
+        snowflake_client.load(targets)
 
 
 if __name__ == "__main__":
