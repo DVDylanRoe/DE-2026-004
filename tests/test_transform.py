@@ -11,12 +11,10 @@ def test_transform():
     input_file_path = fixture_dir / "players_raw.csv"
     input = pl.read_csv(input_file_path, dtypes={"UID": pl.Utf8})
 
-    output_transform, output_similar, output_shortlist = transform(
-        input, transform_context
-    )
+    output = transform(input, transform_context)
 
     expcted_transform_file_path = fixture_dir / "players_transformed.csv"
     expected_transform = pl.read_csv(
         expcted_transform_file_path, dtypes={"UID": pl.Utf8}
     )
-    assert_frame_equal(output_transform, expected_transform, check_exact=False)
+    assert_frame_equal(output.transformed, expected_transform, check_exact=False)

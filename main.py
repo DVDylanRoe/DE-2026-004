@@ -34,13 +34,13 @@ def main(load_sf=True):
 
     players_df = get_players_data(Path(config["input_html"]).resolve())
 
-    transform_df, similar_df, shortlist_df = transform(players_df, transform_context)
+    pipeline_result = transform(players_df, transform_context)
 
     targets = [
-        LoadTarget(None, players_df, Path(config["output_raw"]).resolve()),
+        LoadTarget(None, pipeline_result.raw, Path(config["output_raw"]).resolve()),
         LoadTarget(
             "players" if load_sf else None,
-            transform_df,
+            pipeline_result.transformed,
             Path(config["output_transformed"]).resolve(),
         ),
     ]
