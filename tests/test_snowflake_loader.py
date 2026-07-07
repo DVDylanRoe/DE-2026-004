@@ -1,7 +1,7 @@
 from unittest.mock import patch, MagicMock
 import pytest
 from config import SnowflakeCredentials, LoadTarget
-from loaders import SnowflakeClient
+from external.loaders import SnowflakeClient
 
 
 @pytest.fixture
@@ -12,7 +12,7 @@ def mock_connect():
     return mock_conn
 
 
-@patch("loaders.snowflake.connector.connect")
+@patch("external.loaders.snowflake.connector.connect")
 def test_get_connection(mock_connect):
     credentials = SnowflakeCredentials(
         account="constant",
@@ -37,7 +37,7 @@ def test_get_connection(mock_connect):
     )
 
 
-@patch("loaders.snowflake.connector.connect")
+@patch("external.loaders.snowflake.connector.connect")
 def test_stage_data(mock_connect):
 
     credentials = SnowflakeCredentials(
@@ -61,7 +61,7 @@ def test_stage_data(mock_connect):
     mock_cursor.execute.assert_called_once_with(put_cmd)
 
 
-@patch("loaders.snowflake.connector.connect")
+@patch("external.loaders.snowflake.connector.connect")
 def test_copy_data_into_table(mock_connect):
 
     credentials = SnowflakeCredentials(
@@ -85,7 +85,7 @@ def test_copy_data_into_table(mock_connect):
     mock_cursor.execute.assert_called_once_with(copy_cmd)
 
 
-@patch("loaders.snowflake.connector.connect")
+@patch("external.loaders.snowflake.connector.connect")
 def test_generate_put_command(mock_connect):
 
     credentials = SnowflakeCredentials(
@@ -117,7 +117,7 @@ OVERWRITE=TRUE;
     assert put_cmd == expected_put_cmd
 
 
-@patch("loaders.snowflake.connector.connect")
+@patch("external.loaders.snowflake.connector.connect")
 def test_generate_copy_command(mock_connect):
 
     credentials = SnowflakeCredentials(

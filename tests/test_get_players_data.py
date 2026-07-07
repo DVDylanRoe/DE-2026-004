@@ -1,7 +1,7 @@
 import filecmp
 from pathlib import Path
 import polars as pl
-import html_reader
+import external.html_reader as html_reader
 
 
 def test_get_players_data():

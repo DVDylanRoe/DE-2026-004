@@ -5,7 +5,7 @@ from config import (
     TransformContext,
     Baseline,
 )
-from shortlist import (
+from core.shortlist import (
     create_shortlist,
     find_player_baseline,
     filter_shortlist,

@@ -1,6 +1,6 @@
 import polars as pl
 from dataclasses import dataclass
-from similarity import compute_similarity
+from core.similarity import compute_similarity
 from config import TransformContext
 
 

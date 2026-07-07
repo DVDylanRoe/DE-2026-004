@@ -4,7 +4,7 @@ from config import (
     ColumnConfig,
     TransformContext,
 )
-from similarity import (
+from core.similarity import (
     extract_player_vector,
     extract_feature_matrix,
     scale_similarity,

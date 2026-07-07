@@ -1,5 +1,5 @@
-from html_reader import get_players_data
-from loaders import SnowflakeClient, write_targets
+from external.html_reader import get_players_data
+from external.loaders import SnowflakeClient, write_targets
 from config import (
     ColumnConfig,
     TransformContext,
@@ -8,7 +8,7 @@ from config import (
     load_yaml,
     resolve_uid,
 )
-from pipeline import transform
+from core.pipeline import transform
 from cli import build_parser
 
 from dotenv import load_dotenv

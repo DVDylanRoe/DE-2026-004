@@ -1,4 +1,4 @@
-from loaders import write_targets
+from external.loaders import write_targets
 from config import LoadTarget
 from pathlib import Path
 import polars as pl

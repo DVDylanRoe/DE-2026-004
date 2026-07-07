@@ -2,10 +2,10 @@ import polars as pl
 from dataclasses import dataclass
 
 
-from cleaning import clean_data
-from features import add_features
-from similarity import find_similar_players, compute_similarity
-from shortlist import create_shortlist
+from core.cleaning import clean_data
+from core.features import add_features
+from core.similarity import find_similar_players, compute_similarity
+from core.shortlist import create_shortlist
 from config import TransformContext
 
 
