@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+from prefect import flow
+
 from external.html_reader import get_players_data
 from external.loaders import SnowflakeClient, write_targets
 from config import (
@@ -11,11 +16,7 @@ from config import (
 from core.pipeline import transform
 from cli import build_parser
 
-from dotenv import load_dotenv
-from pathlib import Path
-import os
-
-
+@flow
 def main(load_sf=True):
     parser = build_parser()
     args = parser.parse_args()
