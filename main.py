@@ -16,6 +16,7 @@ from config import (
 from core.pipeline import transform
 from cli import build_parser
 
+
 @flow
 def main(load_sf=True):
     parser = build_parser()
@@ -56,4 +57,4 @@ def main(load_sf=True):
 
 
 if __name__ == "__main__":
-    main()
+    main.serve(name="player-scouting-pipeline")
