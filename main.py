@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 from prefect import flow
+from prefect.client.schemas.schedules import CronSchedule
 
 from external.html_reader import get_players_data
 from external.loaders import SnowflakeClient, write_targets
@@ -18,7 +19,7 @@ from cli import build_parser
 
 
 @flow
-def main(load_sf=True):
+def main(load_sf=True, uid: int|None = None):
     parser = build_parser()
     args = parser.parse_args()
 
@@ -29,7 +30,10 @@ def main(load_sf=True):
         fixture_html = Path(__file__).parent / "tests" / "fixtures" / "players.html"
         config["input_html"] = str(fixture_html)
 
-    uid = str(resolve_uid(config, args))
+    if uid is None:
+        uid = str(resolve_uid(config, args))
+    else: 
+        uid = str(uid)
 
     column_config = ColumnConfig()
     transform_context = TransformContext(column_config, uid)
@@ -57,4 +61,7 @@ def main(load_sf=True):
 
 
 if __name__ == "__main__":
-    main.serve(name="player-scouting-pipeline")
+    main.serve(
+        name="player-scouting-pipeline",
+        schedules=[CronSchedule(cron="0 18 * * *")],
+    )
