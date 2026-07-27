@@ -1,5 +1,6 @@
-import polars as pl
 from dataclasses import dataclass
+from prefect import task
+import polars as pl
 
 
 from core.cleaning import clean_data
@@ -17,6 +18,7 @@ class PipelineResult:
     shortlist: pl.DataFrame
 
 
+@task
 def transform(df: pl.DataFrame, context: TransformContext):
     transform_df = clean_data(df, context.config)
     transform_df = add_features(transform_df, context)

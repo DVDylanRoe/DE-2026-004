@@ -1,6 +1,7 @@
 from config import LoadTarget
-import snowflake.connector
 from pathlib import Path
+from prefect import task
+import snowflake.connector
 
 
 class SnowflakeClient:
@@ -81,6 +82,7 @@ def load(players_df, transform_df):
     transform_df.write_csv("data\\players_transformed.csv")
 
 
+@task
 def write_targets(targets):
     for target in targets:
         target.df.write_csv(target.csv_path)

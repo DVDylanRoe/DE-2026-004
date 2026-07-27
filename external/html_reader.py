@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from prefect import task
 import polars as pl
 
 
@@ -20,6 +21,7 @@ def parse_html_table(html: str) -> tuple[list[str], list[list[str]]]:
     return headers, rows
 
 
+@task
 def get_players_data(file_path: str) -> pl.DataFrame:
 
     html = read_html(file_path)
