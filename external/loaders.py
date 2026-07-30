@@ -82,7 +82,7 @@ def load(players_df, transform_df):
     transform_df.write_csv("data\\players_transformed.csv")
 
 
-@task
+@task(retries=3, retry_delay_seconds=30)
 def write_targets(targets):
     for target in targets:
         target.df.write_csv(target.csv_path)

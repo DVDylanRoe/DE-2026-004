@@ -61,7 +61,13 @@ def main(load_sf=True, uid: int|None = None):
 
 
 if __name__ == "__main__":
-    main.serve(
-        name="player-scouting-pipeline",
-        schedules=[CronSchedule(cron="0 18 * * *")],
-    )
+    parser = build_parser()
+    args = parser.parse_args()
+
+    if args.serve:
+        main.serve(
+            name="player-scouting-pipeline",
+            schedules=[CronSchedule(cron="0 18 * * *")],
+        )
+    else:
+        main()
