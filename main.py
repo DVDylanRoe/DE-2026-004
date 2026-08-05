@@ -1,8 +1,9 @@
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from prefect import flow
+from prefect import flow, runtime
 from prefect.client.schemas.schedules import CronSchedule
+from prefect.logging import get_run_logger
 
 from external.html_reader import get_players_data
 from external.loaders import SnowflakeClient, write_targets
@@ -19,7 +20,10 @@ from cli import build_parser
 
 
 @flow
-def main(load_sf=True, uid: int|None = None):
+def main(load_sf=True, uid: int | None = None):
+    logger = get_run_logger()
+    logger.info(f"Flow run name: {runtime.flow_run.name}")
+
     parser = build_parser()
     args = parser.parse_args()
 
@@ -32,7 +36,7 @@ def main(load_sf=True, uid: int|None = None):
 
     if uid is None:
         uid = str(resolve_uid(config, args))
-    else: 
+    else:
         uid = str(uid)
 
     column_config = ColumnConfig()
